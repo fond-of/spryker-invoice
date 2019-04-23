@@ -1,11 +1,15 @@
 {
-  "name": "fond-of-spryker/brand-company",
-  "description": "Brand Company Spryker Product Module",
+  "name": "fond-of-spryker/invoice",
+  "description": "Extend Spryker Invoice Module",
   "license": "MIT",
   "authors": [
     {
       "name": "Daniel Rose",
       "email": "daniel-rose@gmx.de"
+    },
+    {
+      "name": "Jozsef Geng",
+      "email": "gengjozsef86@gmail.com"
     },
     {
       "name": "Markus Nörenberg",
@@ -18,8 +22,7 @@
   ],
   "require": {
     "php": ">=7.1",
-    "fond-of-spryker/brand": "dev-master",
-    "spryker/company-extension": "^1.0.0"
+    "spryker/invoice": "~2.0.1"
   },
   "require-dev": {
     "spryker/code-sniffer": "^0.11",

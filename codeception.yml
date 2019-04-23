@@ -1,4 +1,4 @@
-namespace: fond-of-spryker/brand-company
+namespace: fond-of-spryker/invoice
 
 suites:
   unit:
