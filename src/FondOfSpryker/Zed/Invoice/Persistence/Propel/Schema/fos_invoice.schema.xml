@@ -5,6 +5,7 @@
         <column name="id_invoice" required="true" type="INTEGER" autoIncrement="true" primaryKey="true"/>
         <column name="fk_sales_order" required="true" type="INTEGER" />
         <column name="order_reference" required="true" size="255" type="VARCHAR"/>
+        <column name="customer_reference" required="true" size="255" type="VARCHAR"/>
         <column name="fk_invoice_address_billing" required="true" type="INTEGER" />
         <column name="fk_invoice_address_shipping" required="true" type="INTEGER" />
         <column name="payment_method" required="true" size="255" type="VARCHAR"/>
