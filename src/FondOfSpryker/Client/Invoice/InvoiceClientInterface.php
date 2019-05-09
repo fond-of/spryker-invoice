@@ -2,22 +2,22 @@
 
 namespace FondOfSpryker\Client\Invoice;
 
-use Generated\Shared\Transfer\OrderListTransfer;
-use Generated\Shared\Transfer\OrderTransfer;
+use Generated\Shared\Transfer\InvoiceResponseTransfer;
+use Generated\Shared\Transfer\InvoiceTransfer;
 
 interface InvoiceClientInterface
 {
     /**
      * Specification:
-     * - Returns the invoices for the given customer and filters.
+     * - Returns the invoices for the given order reference.
      *
      * @api
      *
-     * @param \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
      *
-     * @return \Generated\Shared\Transfer\InvoiceListTransfer
+     * @return \Generated\Shared\Transfer\InvoiceTransfer
      */
-    public function getCustomerInvoices(InvoiceListTransfer $invoiceListTransfer);
+    public function findInvoiceByOrderReference(InvoiceTransfer $invoiceTransfer): InvoiceResponseTransfer;
 
     /**
      * Specification:
@@ -29,7 +29,7 @@ interface InvoiceClientInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceListTransfer
      */
-    public function getPaginatedCustomerInvoices(InvoiceListTransfer $invoiceListTransfer);
+   // public function getPaginatedCustomerInvoices(InvoiceListTransfer $invoiceListTransfer);
 
     /**
      * Specification:
@@ -41,6 +41,6 @@ interface InvoiceClientInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceTransfer
      */
-    public function getOrderDetails(InvoiceTransfer $invoiceTransfer);
+    //public function getOrderDetails(InvoiceTransfer $invoiceTransfer);
 
 }

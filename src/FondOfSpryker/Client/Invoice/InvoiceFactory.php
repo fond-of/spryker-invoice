@@ -2,9 +2,9 @@
 
 namespace FondOfSpryker\Client\Invoice;
 
-use FondOfSpryker\Client\Sales\InvoiceDependencyProvider;
+use FondOfSpryker\Client\Invoice\Zed\InvoiceStub;
 use Spryker\Client\Kernel\AbstractFactory;
-use Spryker\Client\Sales\Zed\SalesStub;
+
 
 class InvoiceFactory extends AbstractFactory
 {

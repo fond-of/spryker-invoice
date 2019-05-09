@@ -2,12 +2,12 @@
 
 namespace FondOfSpryker\Client\Invoice;
 
-use Generated\Shared\Transfer\InvoiceListTransfer;
+use Generated\Shared\Transfer\InvoiceResponseTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 use Spryker\Client\Kernel\AbstractClient;
 
 /**
- * @method \Spryker\Client\Invoice\InvoiceFactory getFactory()
+ * @method \FondOfSpryker\Client\Invoice\InvoiceFactory getFactory()
  */
 class InvoiceClient extends AbstractClient implements InvoiceClientInterface
 {
@@ -20,11 +20,11 @@ class InvoiceClient extends AbstractClient implements InvoiceClientInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceListTransfer
      */
-    public function getOrders(InvoiceListTransfer $invoiceListTransfer)
+    public function findInvoiceByOrderReference(InvoiceTransfer $invoiceTransfer): InvoiceResponseTransfer
     {
         return $this->getFactory()
-            ->createZedSalesStub()
-            ->getCustomerInvoices($invoiceListTransfer);
+            ->createZedInvoiceStub()
+            ->findInvoiceByOrderReference($invoiceTransfer);
     }
 
     /**
@@ -36,12 +36,12 @@ class InvoiceClient extends AbstractClient implements InvoiceClientInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceListTransfer
      */
-    public function getPaginatedCustomerInvoices(InvoiceListTransfer $invoiceListTransfer)
+    /*public function getPaginatedCustomerInvoices(InvoiceListTransfer $invoiceListTransfer)
     {
         return $this->getFactory()
             ->createZedSalesStub()
             ->getPaginatedCustomerInvoices($invoiceListTransfer);
-    }
+    }*/
     
     /**
      * {@inheritdoc}
@@ -52,10 +52,10 @@ class InvoiceClient extends AbstractClient implements InvoiceClientInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceTransfer
      */
-    public function getInvoiceDetails(InvoiceTransfer $invoiceTransfer)
+    /*public function getInvoiceDetails(InvoiceTransfer $invoiceTransfer)
     {
         return $this->getFactory()
             ->createZedSalesStub()
             ->getInvoiceDetails($invoiceTransfer);
-    }
+    }*/
 }

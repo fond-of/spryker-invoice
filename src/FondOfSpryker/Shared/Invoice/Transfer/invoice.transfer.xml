@@ -62,4 +62,11 @@
         <property name="position" type="int" />
     </transfer>
 
+    <transfer name="InvoiceResponse">
+        <property name="hasInvoice" type="bool" />
+        <property name="invoiceTransfer" type="Invoice" />
+        <property name="isSuccess" type="bool" />
+        <property name="errors" type="InvoiceError[]" singular="error" />
+    </transfer>
+
 </transfers>

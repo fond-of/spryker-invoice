@@ -66,7 +66,7 @@
         <id-method-parameter value="fos_invoice_item_pk_seq"/>
     </table>
 
-    <table name="fos_invoice_address" phpName="FosInvoice" identifierQuoting="true">
+    <table name="fos_invoice_address" phpName="FosInvoiceAddress" identifierQuoting="true">
         <column name="id_invoice_address" required="true" type="INTEGER" autoIncrement="true" primaryKey="true"/>
         <column name="fk_country" type="INTEGER" required="true"/>
         <column name="fk_region" type="INTEGER"/>
