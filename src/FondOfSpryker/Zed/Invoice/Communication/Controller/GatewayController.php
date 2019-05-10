@@ -22,4 +22,13 @@ class GatewayController extends AbstractGatewayController
         return $this->getFacade()->findInvoiceByOrderReference($invoiceTransfer->getOrderReference());
     }
 
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     *
+     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
+     */
+    public function createAction(InvoiceTransfer $invoiceTransfer)
+    {
+        return $this->getFacade()->createInvoice($invoiceTransfer);
+    }
 }

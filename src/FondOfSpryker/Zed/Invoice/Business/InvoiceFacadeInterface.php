@@ -3,6 +3,7 @@
 namespace FondOfSpryker\Zed\Invoice\Business;
 
 use Generated\Shared\Transfer\InvoiceResponseTransfer;
+use Generated\Shared\Transfer\InvoiceTransfer;
 
 interface InvoiceFacadeInterface
 {
@@ -18,4 +19,17 @@ interface InvoiceFacadeInterface
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
     public function findInvoiceByOrderReference(string $orderReference): InvoiceResponseTransfer;
+
+    /**
+     * Specification:
+     * - create Invoice
+     *
+     * @api
+     *
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     *
+     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
+     */
+    public function createInvoice(InvoiceTransfer $invoiceTransfer);
+
 }

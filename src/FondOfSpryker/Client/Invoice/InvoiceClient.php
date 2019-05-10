@@ -16,9 +16,9 @@ class InvoiceClient extends AbstractClient implements InvoiceClientInterface
      *
      * @api
      *
-     * @param \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer
+     * @param \Generated\Shared\Transfer\InvoiceTransfer InvoiceTransfer
      *
-     * @return \Generated\Shared\Transfer\InvoiceListTransfer
+     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
     public function findInvoiceByOrderReference(InvoiceTransfer $invoiceTransfer): InvoiceResponseTransfer
     {
@@ -27,35 +27,20 @@ class InvoiceClient extends AbstractClient implements InvoiceClientInterface
             ->findInvoiceByOrderReference($invoiceTransfer);
     }
 
+
     /**
      * {@inheritdoc}
      *
      * @api
      *
-     * @param \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer
+     * @param \Generated\Shared\Transfer\InvoiceTransfer InvoiceTransfer
      *
-     * @return \Generated\Shared\Transfer\InvoiceListTransfer
+     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
-    /*public function getPaginatedCustomerInvoices(InvoiceListTransfer $invoiceListTransfer)
+    public function createInvoice(InvoiceTransfer $invoiceTransfer)
     {
         return $this->getFactory()
-            ->createZedSalesStub()
-            ->getPaginatedCustomerInvoices($invoiceListTransfer);
-    }*/
-    
-    /**
-     * {@inheritdoc}
-     *
-     * @api
-     *
-     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
-     *
-     * @return \Generated\Shared\Transfer\InvoiceTransfer
-     */
-    /*public function getInvoiceDetails(InvoiceTransfer $invoiceTransfer)
-    {
-        return $this->getFactory()
-            ->createZedSalesStub()
-            ->getInvoiceDetails($invoiceTransfer);
-    }*/
+            ->createZedInvoiceStub()
+            ->create($invoiceTransfer);
+    }
 }

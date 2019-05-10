@@ -35,4 +35,18 @@ class InvoiceStub implements InvoiceStubInterface
         return $invoiceTransfer;
     }
 
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     *
+     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
+     */
+    public function create(InvoiceTransfer $invoiceTransfer)
+    {
+        /** @var \Generated\Shared\Transfer\InvoiceResponseTransfer $invoiceResponseTransfer */
+        $invoiceResponseTransfer = $this->zedStub->call('/invoice/gateway/create', $invoiceTransfer);
+
+        return $invoiceResponseTransfer;
+    }
+
+
 }

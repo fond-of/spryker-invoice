@@ -69,4 +69,8 @@
         <property name="errors" type="InvoiceError[]" singular="error" />
     </transfer>
 
+    <transfer name="InvoiceError">
+        <property name="message" type="string" />
+    </transfer>
+
 </transfers>

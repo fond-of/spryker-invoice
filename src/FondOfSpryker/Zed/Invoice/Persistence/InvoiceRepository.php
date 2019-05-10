@@ -19,8 +19,6 @@ class InvoiceRepository extends AbstractRepository implements InvoiceRepositoryI
     {
         $invoiceEntity = $this->getFactory()->createFosInvoiceQuery()->findOneByOrderReference($orderReference);
 
-        print_r($invoiceEntity);
-
         if ($invoiceEntity === null) {
             return null;
         }
