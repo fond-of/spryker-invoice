@@ -2,6 +2,8 @@
 
 namespace FondOfSpryker\Zed\Invoice\Dependency\Facade;
 
+use Orm\Zed\Sales\Persistence\SpySalesOrder;
+
 interface InvoiceToSalesInterface
 {
     /**
@@ -9,5 +11,5 @@ interface InvoiceToSalesInterface
      *
      * @return int
      */
-    public function getIdSalesOrderByOrderReference(string $orderReference): int;
+    public function findSalesOrderByOrderReference(string $orderReference): SpySalesOrder;
 }

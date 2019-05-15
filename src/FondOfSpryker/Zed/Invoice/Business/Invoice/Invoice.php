@@ -256,7 +256,7 @@ class Invoice implements InvoiceInterface
         $invoiceEntity->setCustomerReference($invoiceTransfer->getCustomerReference());
         $invoiceEntity->setFkInvoiceAddressBilling($invoiceEntity->getBillingAddress()->getIdInvoiceAddress());
         $invoiceEntity->setFkInvoiceAddressShipping($invoiceEntity->getShippingAddress()->getIdInvoiceAddress());
-        $invoiceEntity->setPaymentMethod($invoiceTransfer->getPaymentMethod()->getCode());
+        $invoiceEntity->setPaymentMethod($invoiceTransfer->getPayment()->getCode());
         $invoiceEntity->setStore($invoiceTransfer->getStore());
         $invoiceEntity->setFkLocale($this->getIdLocale($invoiceTransfer));
         $invoiceEntity->setCurrencyIsoCode($invoiceTransfer->getCurrency());
@@ -321,7 +321,13 @@ class Invoice implements InvoiceInterface
      */
     protected function getIdSalesOrder(string $orderReference): int
     {
-        return $this->salesFacade->getIdSalesOrderByOrderReference($orderReference);
+        $salesOrderEntity = $this->salesFacade->findSalesOrderByOrderReference($orderReference);
+
+        if ($salesOrderEntity === null) {
+            return null;
+        }
+
+        return $salesOrderEntity->getIdSalesOrder();
     }
 
     /**

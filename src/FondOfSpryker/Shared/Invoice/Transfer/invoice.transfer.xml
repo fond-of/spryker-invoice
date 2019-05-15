@@ -10,7 +10,7 @@
         <property name="customerReference" type="string" />
         <property name="billingAddress" type="InvoiceAddress" />
         <property name="shippingAddress" type="InvoiceAddress" />
-        <property name="paymentMethod" type="InvoicePaymentMethod" />
+        <property name="payment" type="InvoicePayment" />
         <property name="locale" type="string" />
         <property name="currency" type="string" />
         <property name="store" type="string" />
@@ -71,7 +71,7 @@
         <property name="errors" type="InvoiceError[]" singular="error" />
     </transfer>
 
-    <transfer name="InvoicePaymentMethod">
+    <transfer name="InvoicePayment">
         <property name="code" type="string" />
         <property name="name" type="string" />
     </transfer>
