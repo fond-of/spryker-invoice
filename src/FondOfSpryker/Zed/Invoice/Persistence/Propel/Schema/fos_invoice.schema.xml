@@ -83,6 +83,7 @@
         <column name="po_box" size="255" type="VARCHAR"/>
         <column name="phone" size="255" type="VARCHAR"/>
         <column name="email" size="255" type="VARCHAR" required="false"/>
+        <column name="type" type="ENUM" valueSet="billing, shipping" />
 
         <foreign-key name="fos_invoice_address-fk_country" foreignTable="spy_country" phpName="Country" refPhpName="InvoiceAddress">
             <reference local="fk_country" foreign="id_country"/>

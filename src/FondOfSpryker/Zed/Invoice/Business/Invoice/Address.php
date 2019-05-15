@@ -12,6 +12,9 @@ use Orm\Zed\Invoice\Persistence\FosInvoiceAddress;
 
 class Address implements AddressInterface
 {
+    public const ADDRESS_TYPE_BILLING = 'billing';
+    public const ADDRESS_TYPE_SHIPPING = 'shipping';
+
     /**
      * @var \FondOfSpryker\Zed\Invoice\Persistence\InvoiceQueryContainerInterface
      */

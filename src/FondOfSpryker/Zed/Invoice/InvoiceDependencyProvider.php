@@ -4,6 +4,7 @@ namespace FondOfSpryker\Zed\Invoice;
 
 use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryBridge;
 use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToLocaleBridge;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSalesBridge;
 use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Shared\Kernel\Store;
 use Spryker\Zed\Kernel\Container;
@@ -16,6 +17,7 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const FACADE_COUNTRY = 'FACADE_COUNTRY';
     public const FACADE_LOCALE = 'FACADE_LOCALE';
+    public const FACADE_SALES = 'FACADE_SALES';
 
     public const PLUGINS_POST_INVOICE_CREATE = 'PLUGINS_POST_INVOICE_CREATE';
 
@@ -31,11 +33,12 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
      */
     public function provideBusinessLayerDependencies(Container $container)
     {
-        $container = $this->addCountryFacade($container);
         $container = $this->addLocaleQueryConainer($container);
         $container = $this->addSalesQueryConainer($container);
         $container = $this->addStore($container);
+        $container = $this->addCountryFacade($container);
         $container = $this->addLocaleFacade($container);
+        $container = $this->addSalesFacade($container);
         $container = $this->addPostInvoiceCreatePlugins($container);
 
         return $container;
@@ -93,6 +96,20 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container[static::FACADE_COUNTRY] = function (Container $container) {
             return new InvoiceToCountryBridge($container->getLocator()->country()->facade());
+        };
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    protected function addSalesFacade(Container $container): Container
+    {
+        $container[static::FACADE_SALES] = function (Container $container) {
+            return new InvoiceToSalesBridge($container->getLocator()->sales()->facade());
         };
 
         return $container;

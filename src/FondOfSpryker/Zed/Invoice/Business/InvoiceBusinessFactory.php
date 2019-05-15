@@ -36,6 +36,7 @@ class InvoiceBusinessFactory extends AbstractBusinessFactory
         $config = $this->getConfig();
 
         $invoice = new Invoice(
+            $this->getSalesFacade(),
             $this->getCountryFacade(),
             $this->getQueryContainer(),
             $config,
@@ -92,10 +93,18 @@ class InvoiceBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
-     * @return \Spryker\Zed\Sales\Dependency\Facade\SalesToCountryInterface
+     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryInterface
      */
     protected function getCountryFacade()
     {
         return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_COUNTRY);
+    }
+
+    /**
+     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSalesInterface
+     */
+    protected function getSalesFacade()
+    {
+        return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_SALES);
     }
 }

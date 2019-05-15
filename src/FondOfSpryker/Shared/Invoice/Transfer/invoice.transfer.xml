@@ -7,11 +7,12 @@
         <property name="idInvoice" type="int" />
         <property name="fkSalesOrder" type="int" />
         <property name="orderReference" type="string" />
-        <property name="fkInvoiceAddressBilling" type="int" />
-        <property name="fkInvoiceAddressShipping" type="int" />
-        <property name="paymentMethod" type="string" />
+        <property name="customerReference" type="string" />
+        <property name="billingAddress" type="InvoiceAddress" />
+        <property name="shippingAddress" type="InvoiceAddress" />
+        <property name="paymentMethod" type="InvoicePaymentMethod" />
         <property name="locale" type="string" />
-        <property name="currencyIsoCode" type="string" />
+        <property name="currency" type="string" />
         <property name="store" type="string" />
     </transfer>
 
@@ -37,6 +38,7 @@
         <property name="poBox" type="string" />
         <property name="phone" type="string" />
         <property name="email" type="string" />
+        <property name="type" type="string" />
     </transfer>
 
     <transfer name="InvoiceItem">
@@ -67,6 +69,11 @@
         <property name="invoiceTransfer" type="Invoice" />
         <property name="isSuccess" type="bool" />
         <property name="errors" type="InvoiceError[]" singular="error" />
+    </transfer>
+
+    <transfer name="InvoicePaymentMethod">
+        <property name="code" type="string" />
+        <property name="name" type="string" />
     </transfer>
 
     <transfer name="InvoiceError">
