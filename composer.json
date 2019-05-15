@@ -22,6 +22,7 @@
   ],
   "require": {
     "php": ">=7.1",
+    "fond-of-spryker/country": "^1.0",
     "spryker/invoice": "~2.0.1"
   },
   "require-dev": {

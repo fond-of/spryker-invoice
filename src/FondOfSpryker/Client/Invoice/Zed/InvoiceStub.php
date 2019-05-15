@@ -31,7 +31,6 @@ class InvoiceStub implements InvoiceStubInterface
         /** @var \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer */
         $invoiceTransfer = $this->zedStub->call('/invoice/gateway/find-invoice-by-order-reference', $invoiceTransfer);
 
-
         return $invoiceTransfer;
     }
 

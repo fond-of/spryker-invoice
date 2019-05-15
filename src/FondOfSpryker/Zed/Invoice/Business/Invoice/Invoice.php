@@ -3,19 +3,26 @@
 namespace FondOfSpryker\Zed\Invoice\Business\Invoice;
 
 use FondOfSpryker\Shared\Invoice\Code\Messages;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryInterface;
 use FondOfSpryker\Zed\Invoice\InvoiceConfig;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceQueryContainerInterface;
+use Generated\Shared\Transfer\InvoiceAddressTransfer;
 use Generated\Shared\Transfer\InvoiceErrorTransfer;
 use Generated\Shared\Transfer\InvoiceResponseTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 use Orm\Zed\Invoice\Persistence\FosInvoice;
-use Orm\Zed\Sales\Persistence\SpySalesOrder;
+use Orm\Zed\Invoice\Persistence\FosInvoiceAddress;
 use Spryker\Shared\Kernel\Store;
 use Spryker\Zed\Locale\Persistence\LocaleQueryContainerInterface;
 
 
 class Invoice implements InvoiceInterface
 {
+    /**
+     * @var \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryInterface
+     */
+    protected $countryFacade;
+
     /**
      * @var \FondOfSpryker\Zed\Invoice\Persistence\InvoiceQueryContainerInterface
      */
@@ -49,13 +56,16 @@ class Invoice implements InvoiceInterface
     /**
      * Invoice constructor.
      *
+     * @param \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryInterface $countryFacade
      * @param \FondOfSpryker\Zed\Invoice\Persistence\InvoiceQueryContainerInterface $queryContainer
-     * @param \FondOfSpryker\Zed\Invoice\InvoiceConfig $InvoiceConfig
+     * @param \FondOfSpryker\Zed\Invoice\InvoiceConfig $invoiceConfig
+     * @param \FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceValidatorInterface $invoiceValidator
      * @param \Spryker\Zed\Locale\Persistence\LocaleQueryContainerInterface $localeQueryContainer
      * @param \Spryker\Shared\Kernel\Store $store
      * @param array $postInvoiceCreatePlugins
      */
     public function __construct(
+        InvoiceToCountryInterface $countryFacade,
         InvoiceQueryContainerInterface $queryContainer,
         InvoiceConfig $invoiceConfig,
         InvoiceValidatorInterface $invoiceValidator,
@@ -63,6 +73,7 @@ class Invoice implements InvoiceInterface
         Store $store,
         array $postInvoiceCreatePlugins = []
     ) {
+        $this->countryFacade = $countryFacade;
         $this->queryContainer = $queryContainer;
         $this->invoiceConfig = $invoiceConfig;
         $this->invoiceValidator = $invoiceValidator;
@@ -95,7 +106,6 @@ class Invoice implements InvoiceInterface
      */
     public function add($invoiceTransfer)
     {
-
         $invoiceEntity = new FosInvoice();
         $invoiceEntity->fromArray($invoiceTransfer->toArray());
 
@@ -106,15 +116,12 @@ class Invoice implements InvoiceInterface
             return $invoiceResponseTransfer;
         }
 
-        $invoiceEntity->save();
+        $this->saveInvoiceTransaction($invoiceTransfer);
 
-
-       /* $invoiceTransfer->setCreatedAt($invoiceEntity->getCreatedAt()->format("Y-m-d H:i:s.u"));
-        $invoiceTransfer->setUpdatedAt($invoiceEntity->getUpdatedAt()->format("Y-m-d H:i:s.u"));
 
         $invoiceResponseTransfer
             ->setIsSuccess(true)
-            ->setInvoiceTransfer($invoiceTransfer);*/
+            ->setInvoiceTransfer($invoiceTransfer);
 
         return $invoiceResponseTransfer;
     }
@@ -178,6 +185,113 @@ class Invoice implements InvoiceInterface
         );
 
         return $invoiceResponseTransfer;
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     *
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoice
+     */
+    protected function saveInvoiceTransaction(InvoiceTransfer $invoiceTransfer)
+    {
+        $invoiceEntity = $this->saveInvoiceEntity($invoiceTransfer);
+
+
+        return $invoiceEntity;
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     *
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoice
+     */
+    protected function saveInvoiceEntity(InvoiceTransfer $invoiceTransfer)
+    {
+        $invoiceEntity = $this->createInvoiceEntity();
+        $this->hydrateAddresses($invoiceTransfer, $invoiceEntity);
+
+        return $invoiceEntity;
+    }
+
+
+    /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     * @param \Orm\Zed\Sales\Persistence\SpySalesOrder $salesOrderEntity
+     *
+     * @return void
+     */
+    protected function hydrateAddresses(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity)
+    {
+        $billingAddressEntity = $this->saveInvoiceAddress($invoiceTransfer->getBillingAddress());
+        $shippingAddressEntity = $this->saveInvoiceAddress($invoiceTransfer->getShippingAddress());
+
+        //$invoiceEntity->setBillingAddress($billingAddressEntity);
+        //$invoiceEntity->setShippingAddress($shippingAddressEntity);
+    }
+
+
+    protected function hydrateInvoiceEntity(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity)
+    {
+        $invoiceEntity->setOrderReference($invoiceTransfer->getOrderReference());
+        $invoiceEntity->setCustomerReference($invoiceTransfer->getCustomerReference());
+        $invoiceEntity->setStore($invoiceTransfer->getStore());
+        $invoiceEntity->setFkLocale();
+        $invoiceEntity->setCurrencyIsoCode($invoiceTransfer->getCurrency());
+        
+    }
+
+
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceAddressTransfer $addressTransfer
+     *
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoiceAddress
+     */
+    protected function saveInvoiceAddress(InvoiceAddressTransfer $addressTransfer)
+    {
+        $invoiceAddressEntity = $this->createInvoiceAddressEntity();
+        $this->hydrateInvoiceAddress($addressTransfer, $invoiceAddressEntity);
+        $invoiceAddressEntity->save();
+
+        $addressTransfer->setIdInvoiceAddress($invoiceAddressEntity->getIdInvoiceAddress());
+
+        return $invoiceAddressEntity;
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\AddressTransfer $addressTransfer
+     * @param \Orm\Zed\Sales\Persistence\SpySalesOrderAddress $salesOrderAddressEntity
+     *
+     * @return void
+     */
+    protected function hydrateInvoiceAddress(InvoiceAddressTransfer $addressTransfer, FosInvoiceAddress $invoiceAddressEntity)
+    {
+        $invoiceAddressEntity->fromArray($addressTransfer->toArray());
+        
+        $invoiceAddressEntity->setFkCountry(
+            $this->countryFacade->getCountryByIso2Code($addressTransfer->getCountry())->getIdCountry()
+        );
+
+        $invoiceAddressEntity->setFkRegion(
+            $this->countryFacade->getIdRegionByIso2Code($addressTransfer->getRegion())
+        );
+
+        throw new \Exception(serialize($invoiceAddressEntity->toArray($addressTransfer->getRegion())));
+    }
+
+    /**
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoice
+     */
+    protected function createInvoiceEntity()
+    {
+        return new FosInvoice();
+    }
+
+    /**
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoiceAddress
+     */
+    protected function createInvoiceAddressEntity()
+    {
+        return new FosInvoiceAddress();
     }
 
 }
