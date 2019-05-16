@@ -4,21 +4,29 @@ namespace FondOfSpryker\Zed\Invoice\Business\Invoice;
 
 use FondOfSpryker\Shared\Invoice\Code\Messages;
 use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryInterface;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToProductInterface;
 use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSalesInterface;
 use FondOfSpryker\Zed\Invoice\InvoiceConfig;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceQueryContainerInterface;
 use Generated\Shared\Transfer\InvoiceAddressTransfer;
 use Generated\Shared\Transfer\InvoiceErrorTransfer;
+use Generated\Shared\Transfer\InvoiceItemTransfer;
 use Generated\Shared\Transfer\InvoiceResponseTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 use Orm\Zed\Invoice\Persistence\FosInvoice;
 use Orm\Zed\Invoice\Persistence\FosInvoiceAddress;
+use Orm\Zed\Invoice\Persistence\FosInvoiceItem;
 use Spryker\Shared\Kernel\Store;
 use Spryker\Zed\Locale\Persistence\LocaleQueryContainerInterface;
 
 
 class Invoice implements InvoiceInterface
 {
+    /**
+     * @var \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToProductInterface
+     */
+    protected $productFacade;
+
     /**
      * @var \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSalesInterface
      */
@@ -71,6 +79,7 @@ class Invoice implements InvoiceInterface
      * @param array $postInvoiceCreatePlugins
      */
     public function __construct(
+        InvoiceToProductInterface $productFacade,
         InvoiceToSalesInterface $salesFacade,
         InvoiceToCountryInterface $countryFacade,
         InvoiceQueryContainerInterface $queryContainer,
@@ -81,6 +90,7 @@ class Invoice implements InvoiceInterface
         array $postInvoiceCreatePlugins = []
     ) {
         $this->countryFacade = $countryFacade;
+        $this->productFacade = $productFacade;
         $this->salesFacade = $salesFacade;
         $this->queryContainer = $queryContainer;
         $this->invoiceConfig = $invoiceConfig;
@@ -204,6 +214,8 @@ class Invoice implements InvoiceInterface
     {
         $invoiceEntity = $this->saveInvoiceEntity($invoiceTransfer);
 
+        $this->saveInvoiceItems($invoiceTransfer, $invoiceEntity);
+
         return $invoiceEntity;
     }
 
@@ -302,6 +314,50 @@ class Invoice implements InvoiceInterface
     }
 
     /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     * @param \Orm\Zed\Sales\Persistence\SpySalesOrder $salesOrderEntity
+     *
+     * @return void
+     */
+    protected function saveInvoiceItems(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity)
+    {
+
+        foreach ($invoiceTransfer->getItems() as $itemTransfer) {
+            $invoiceItemEntity = $this->createInvoiceItemEntity();
+            $this->hydrateInvoiceItemEntity($invoiceEntity, $invoiceTransfer, $invoiceItemEntity, $itemTransfer);
+
+            //$invoiceItemEntity = $this->executInvoiceItemExpanderPreSavePlugins($invoiceTransfer, $itemTransfer, $invoiceItemEntity);
+            $invoiceItemEntity->save();
+        }
+    }
+
+    /**
+     * @param \Orm\Zed\Sales\Persistence\SpySalesOrder $salesOrderEntity
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     * @param \Orm\Zed\Sales\Persistence\SpySalesOrderItem $salesOrderItemEntity
+     * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
+     *
+     * @return void
+     */
+    protected function hydrateInvoiceItemEntity(
+        FosInvoice $invoiceEntity,
+        InvoiceTransfer $invoiceTransfer,
+        FosInvoiceItem $invoiceItemEntity,
+        InvoiceItemTransfer $itemTransfer
+    ) {
+        $invoiceItemEntity->fromArray($itemTransfer->toArray());
+
+
+        $invoiceItemEntity->setFkInvoice($invoiceEntity->getIdInvoice());
+        $invoiceItemEntity->setFkProductAbstract($this->getIdProductAbstractByConcreteSku($itemTransfer->getSku()));
+        $invoiceItemEntity->setFkProduct($this->getIdProductConcreteBySku($itemTransfer->getSku()));
+
+        /*$invoiceItemEntity->setFkOmsInvoiceItemState($initialStateEntity->getIdOmsInvoiceItemState());
+
+        $invoiceItemEntity->setProcess($processEntity);*/
+    }
+
+    /**
      * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
      *
      * @return int
@@ -331,6 +387,26 @@ class Invoice implements InvoiceInterface
     }
 
     /**
+     * @param string $sku
+     *
+     * @return int
+     */
+    protected function getIdProductAbstractByConcreteSku(string $sku): int
+    {
+        return $this->productFacade->findIdProductAbstactByConcreteSku($sku);
+    }
+
+    /**
+     * @param string $sku
+     * 
+     * @return int
+     */
+    protected function getIdProductConcreteBySku(string $sku): int
+    {
+        return $this->productFacade->findProductConcreteIdBySku($sku);
+    }
+
+    /**
      * @return \Orm\Zed\Invoice\Persistence\FosInvoice
      */
     protected function createInvoiceEntity()
@@ -344,6 +420,14 @@ class Invoice implements InvoiceInterface
     protected function createInvoiceAddressEntity()
     {
         return new FosInvoiceAddress();
+    }
+
+    /**
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoiceItem
+     */
+    protected function createInvoiceItemEntity()
+    {
+        return new FosInvoiceItem();
     }
 
 }

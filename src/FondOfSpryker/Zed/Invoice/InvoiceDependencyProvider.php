@@ -4,6 +4,7 @@ namespace FondOfSpryker\Zed\Invoice;
 
 use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryBridge;
 use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToLocaleBridge;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToProductBridge;
 use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSalesBridge;
 use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Shared\Kernel\Store;
@@ -17,6 +18,7 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const FACADE_COUNTRY = 'FACADE_COUNTRY';
     public const FACADE_LOCALE = 'FACADE_LOCALE';
+    public const FACADE_PRODUCT = 'FACADE_PRODUCT';
     public const FACADE_SALES = 'FACADE_SALES';
 
     public const PLUGINS_POST_INVOICE_CREATE = 'PLUGINS_POST_INVOICE_CREATE';
@@ -38,6 +40,7 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addStore($container);
         $container = $this->addCountryFacade($container);
         $container = $this->addLocaleFacade($container);
+        $container = $this->addProductFacade($container);
         $container = $this->addSalesFacade($container);
         $container = $this->addPostInvoiceCreatePlugins($container);
 
@@ -82,6 +85,20 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container[static::FACADE_LOCALE] = function (Container $container) {
             return new InvoiceToLocaleBridge($container->getLocator()->locale()->facade());
+        };
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    protected function addProductFacade(Container $container)
+    {
+        $container[static::FACADE_PRODUCT] = function (Container $container) {
+            return new InvoiceToProductBridge($container->getLocator()->product()->facade());
         };
 
         return $container;
