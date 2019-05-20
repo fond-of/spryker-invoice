@@ -2,7 +2,7 @@
 
 namespace FondOfSpryker\Zed\Invoice\Business;
 
-use Generated\Shared\Transfer\InvoiceResponseTransfer;
+use Generated\Shared\Transfer\InvoiceListTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 use Spryker\Zed\Kernel\Business\AbstractFacade;
 
@@ -12,13 +12,14 @@ use Spryker\Zed\Kernel\Business\AbstractFacade;
 class InvoiceFacade extends AbstractFacade implements InvoiceFacadeInterface
 {
     /**
-     * @param string $invoiceReference
+     * @param \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer
+     * @param string $customerReference
      *
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
-    public function findInvoiceByOrderReference(string $invoiceReference): InvoiceResponseTransfer
+    public function findInvoicesByCustomerReference(InvoiceListTransfer $invoiceListTransfer, string $customerReference)
     {
-        return $this->getFactory()->createInvoiceReader()->findInvoiceByOrderReference($invoiceReference);
+        return $this->getFactory()->createInvoiceReader()->findInvoicesByCustomerReference($invoiceListTransfer, $customerReference);
     }
 
     /**

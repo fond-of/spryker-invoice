@@ -18,6 +18,7 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const FACADE_COUNTRY = 'FACADE_COUNTRY';
     public const FACADE_LOCALE = 'FACADE_LOCALE';
+    public const FACADE_OMS = 'FACADE_OMS';
     public const FACADE_PRODUCT = 'FACADE_PRODUCT';
     public const FACADE_SALES = 'FACADE_SALES';
 
@@ -82,6 +83,20 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
      * @return \Spryker\Zed\Kernel\Container
      */
     protected function addLocaleFacade(Container $container)
+    {
+        $container[static::FACADE_OMS] = function (Container $container) {
+            return new InvoiceToOmsBridge($container->getLocator()->oms()->facade());
+        };
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    protected function addOmsFacade(Container $container)
     {
         $container[static::FACADE_LOCALE] = function (Container $container) {
             return new InvoiceToLocaleBridge($container->getLocator()->locale()->facade());

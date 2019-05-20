@@ -2,7 +2,7 @@
 
 namespace FondOfSpryker\Zed\Invoice\Persistence;
 
-use Generated\Shared\Transfer\InvoiceTransfer;
+use Generated\Shared\Transfer\InvoiceListTransfer;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 
 /**
@@ -11,20 +11,14 @@ use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 class InvoiceRepository extends AbstractRepository implements InvoiceRepositoryInterface
 {
     /**
-     * @param string $orderReference
-     *
-     * @return \Generated\Shared\Transfer\InvoiceTransfer|null
+     * @param string $customerReference
+     * @return
+     * @throws \Exception
      */
-    public function findInvoiceByOrderReference(string $orderReference): ?InvoiceTransfer
+    public function findInvoicesByCustomerReference(string $customerReference)
     {
-        $invoiceEntity = $this->getFactory()->createFosInvoiceQuery()->findOneByOrderReference($orderReference);
-
-        if ($invoiceEntity === null) {
-            return null;
-        }
-
         return $this->getFactory()
-            ->createInvoiceMapper()
-            ->mapInvoiceEntityToInvoice($invoiceEntity->toArray());
+            ->createInvoiceQuery()
+            ->findByCustomerReference($customerReference);
     }
 }

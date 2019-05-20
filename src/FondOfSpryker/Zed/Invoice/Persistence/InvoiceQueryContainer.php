@@ -2,6 +2,7 @@
 
 namespace FondOfSpryker\Zed\Invoice\Persistence;
 
+use Orm\Zed\Invoice\Persistence\FosInvoiceQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractQueryContainer;
 
 /**
@@ -10,6 +11,14 @@ use Spryker\Zed\Kernel\Persistence\AbstractQueryContainer;
 class InvoiceQueryContainer extends AbstractQueryContainer implements InvoiceQueryContainerInterface
 {
     /**
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoiceQuery
+     */
+    public function queryInvoices(): FosInvoiceQuery
+    {
+        return $this->getFactory()->createInvoiceQuery();
+    }
+
+    /**
      * @api
      *
      * @inheritdoc
@@ -17,7 +26,10 @@ class InvoiceQueryContainer extends AbstractQueryContainer implements InvoiceQue
     public function queryInvoiceByOrderReference($orderReference)
     {
         $query = $this->queryInvoices();
-        $query->filterByOrderReference($orderReference);
+        $query
+            ->findOneByOrderReference($orderReference);
+
+
 
         return $query;
     }

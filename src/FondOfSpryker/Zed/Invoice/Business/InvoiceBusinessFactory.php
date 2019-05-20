@@ -6,6 +6,7 @@ use FondOfSpryker\Zed\Invoice\Business\Invoice\Invoice;
 use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceReader;
 use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceReaderInterface;
 use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceValidator;
+use FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydrator;
 use FondOfSpryker\Zed\Invoice\InvoiceDependencyProvider;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 
@@ -24,6 +25,7 @@ class InvoiceBusinessFactory extends AbstractBusinessFactory
     {
         return new InvoiceReader(
             $this->getEntityManager(),
+            $this->createInvoiceHydrator(),
             $this->getRepository()
         );
     }
@@ -82,6 +84,16 @@ class InvoiceBusinessFactory extends AbstractBusinessFactory
         return new InvoiceValidator(
             $this->getQueryContainer(),
             $this->getSalesQueryContainer()
+        );
+    }
+
+    /**
+     * @return \Spryker\Zed\Sales\Business\Model\Order\OrderHydratorInterface
+     */
+    public function createInvoiceHydrator()
+    {
+        return new InvoiceHydrator(
+            $this->getQueryContainer()
         );
     }
 

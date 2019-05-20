@@ -78,11 +78,9 @@ class Address implements AddressInterface
      */
     protected function createInvoiceAddress(InvoiceAddressTransfer $addressTransfer)
     {
-        exit('3');
+
         $addressEntity = new FosInvoiceAddress();
         $addressEntity->fromArray($addressTransfer->toArray());
-
-        throw new \Exception($addressEntity->toArray());
 
         $fkCountry = $this->retrieveFkCountry($addressTransfer);
         $addressEntity->setFkCountry($fkCountry);

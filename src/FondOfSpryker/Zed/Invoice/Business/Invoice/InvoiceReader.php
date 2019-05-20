@@ -2,9 +2,14 @@
 
 namespace FondOfSpryker\Zed\Invoice\Business\Invoice;
 
+use ArrayObject;
+use FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydratorInterface;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceEntityManagerInterface;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceRepositoryInterface;
-use Generated\Shared\Transfer\InvoiceResponseTransfer;
+use Generated\Shared\Transfer\InvoiceListTransfer;
+use Orm\Zed\Locale\Persistence\SpyLocale;
+use Orm\Zed\Locale\Persistence\SpyLocaleQuery;
+use Propel\Runtime\Collection\ObjectCollection;
 
 class InvoiceReader implements InvoiceReaderInterface
 {
@@ -12,6 +17,11 @@ class InvoiceReader implements InvoiceReaderInterface
      * @var \FondOfSpryker\Zed\Invoice\Persistence\InvoiceEntityManagerInterface
      */
     protected $invoiceEntityManager;
+
+    /**
+     * @var \FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydratorInterface
+     */
+    protected $invoiceHydrator;
 
     /**
      * @var \FondOfSpryker\Zed\Invoice\Persistence\InvoiceRepositoryInterface
@@ -24,32 +34,68 @@ class InvoiceReader implements InvoiceReaderInterface
      */
     public function __construct(
         InvoiceEntityManagerInterface $invoiceEntityManager,
+        InvoiceHydratorInterface $invoiceHydrator,
         InvoiceRepositoryInterface $invoiceRepository
-
     ) {
         $this->invoiceEntityManager = $invoiceEntityManager;
+        $this->invoiceHydrator = $invoiceHydrator;
         $this->invoiceRepository = $invoiceRepository;
     }
-    
+
     /**
-     * @param string $orderReference
+     * @param \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer
+     * @param string $customerReference
      *
-     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
+     * @return \Generated\Shared\Transfer\InvoiceListTransfer
      */
-    public function findInvoiceByOrderReference(string $orderReference): InvoiceResponseTransfer
+    public function findInvoicesByCustomerReference(InvoiceListTransfer $invoiceListTransfer, string $customerReference): InvoiceListTransfer
     {
-        $invoiceTransfer = $this->invoiceRepository->findInvoiceByOrderReference($orderReference);
+        $invoiceCollection = $this->invoiceRepository->findInvoicesByCustomerReference($customerReference);
+        $invoiceListCollection = $this->hydrateInvoiceListCollectionTransferFromEntityCollection($invoiceCollection);
 
-        $invoiceResponseTransfer = (new InvoiceResponseTransfer())
-            ->setHasInvoice(false)
-            ->setIsSuccess(false);
+        $invoiceListTransfer->setInvoices($invoiceListCollection);
 
-        if ($invoiceTransfer) {
-            $invoiceResponseTransfer->setInvoiceTransfer($invoiceTransfer)
-                ->setHasInvoice(true)
-                ->setIsSuccess(true);
+        return $invoiceListTransfer;
+    }
+
+    /**
+     * @param \Propel\Runtime\Collection\ObjectCollection $orderCollection
+     *
+     * @return \ArrayObject|\Generated\Shared\Transfer\OrderTransfer[]
+     */
+    protected function hydrateInvoiceListCollectionTransferFromEntityCollection(ObjectCollection $orderCollection): ArrayObject
+    {
+        $invoices = new ArrayObject();
+
+        /** @var \Orm\Zed\Invoice\Persistence\Base\FosInvoice $invoiceEntity */
+        foreach ($orderCollection as $invoiceEntity) {
+
+            if ($invoiceEntity->countItems() === 0) {
+                continue;
+            }
+
+            $invoiceTransfer = $this->invoiceHydrator->hydrateInvoiceTransferFromPersistenceByInvoice($invoiceEntity);
+            $invoiceTransfer->setCurrency($invoiceEntity->getCurrencyIsoCode());
+            $invoiceTransfer->setLocale($this->getLocaleNameById($invoiceEntity->getFkLocale()));
+
+            $invoices->append($invoiceTransfer);
         }
 
-        return $invoiceResponseTransfer;
+        return $invoices;
+    }
+
+    /**
+     * @param int $idLocale
+     * @return string
+     *
+     * @throws
+     */
+    protected function getLocaleNameById(int $idLocale): string
+    {
+        $localeEntity = SpyLocaleQuery::create()
+            ->filterByIdLocale($idLocale)
+            ->findOne();
+
+        return $localeEntity->getLocaleName();
     }
 }

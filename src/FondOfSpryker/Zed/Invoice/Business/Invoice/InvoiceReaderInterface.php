@@ -3,14 +3,15 @@
 namespace FondOfSpryker\Zed\Invoice\Business\Invoice;
 
 
-use Generated\Shared\Transfer\InvoiceResponseTransfer;
+use Generated\Shared\Transfer\InvoiceListTransfer;
 
 interface InvoiceReaderInterface
 {
     /**
-     * @param string $orderReference
+     * @param \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer
+     * @param string $customerReference
      *
-     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
+     * @return mixed
      */
-    public function findInvoiceByOrderReference(string $orderReference): InvoiceResponseTransfer;
+    public function findInvoicesByCustomerReference(InvoiceListTransfer $invoiceListTransfer, string $customerReference): InvoiceListTransfer;
 }

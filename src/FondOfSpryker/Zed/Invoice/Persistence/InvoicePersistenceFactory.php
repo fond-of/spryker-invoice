@@ -2,6 +2,8 @@
 
 namespace FondOfSpryker\Zed\Invoice\Persistence;
 
+use Orm\Zed\Invoice\Persistence\Base\FosInvoiceItemQuery;
+use Orm\Zed\Invoice\Persistence\FosInvoiceAddressQuery;
 use Orm\Zed\Invoice\Persistence\FosInvoiceQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractPersistenceFactory;
 
@@ -16,16 +18,25 @@ class InvoicePersistenceFactory extends AbstractPersistenceFactory
     /**
      * @return \Orm\Zed\Invoice\Persistence\FosInvoiceQuery
      */
-    public function createFosInvoiceQuery()
+    public function createInvoiceQuery()
     {
         return FosInvoiceQuery::create();
     }
 
     /**
-     * @return \FondOfSpryker\Zed\Invoice\Persistence\Mapper\InvoiceMapperInterface
-
-    public function createInvoiceMapper(): InvoiceMapperInterface
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoiceAddressQuery
+     */
+    public function createInvoiceAddressQuery()
     {
-        return new InvoiceMapper();
-    }*/
+        return FosInvoiceAddressQuery::create();
+    }
+
+    /**
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoiceItemQuery
+     */
+    public function createInvoiceItemQuery()
+    {
+        return FosInvoiceItemQuery::create();
+    }
+
 }

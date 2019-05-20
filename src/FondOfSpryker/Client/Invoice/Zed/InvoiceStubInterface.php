@@ -13,7 +13,7 @@ interface InvoiceStubInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceTransfer
      */
-    public function findInvoiceByOrderReference(InvoiceTransfer $invoiceTransfer) : InvoiceResponseTransfer;
+    public function findInvoicesByCustomerReference(InvoiceListTransfer $invoiceListTransfer);
 
     /**
      * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer

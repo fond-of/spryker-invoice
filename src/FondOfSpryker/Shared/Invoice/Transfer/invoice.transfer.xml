@@ -19,6 +19,8 @@
 
     <transfer name="InvoiceList">
         <property name="idCustomer" type="int" />
+        <property name="customerReference" type="string" />
+        <property name="filter" type="Filter" />
         <property name="invoices" type="Invoice[]" singular="invoice" />
     </transfer>
 

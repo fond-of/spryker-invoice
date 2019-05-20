@@ -53,7 +53,7 @@
         <column name="shipment_date" type="TIMESTAMP" required="false"/>
         <column name="position" required="false" type="INTEGER"/>
 
-        <foreign-key name="fos_invoice_item-fk_invoice" foreignTable="fos_invoice" phpName="Invoice" refPhpName="Invoice">
+        <foreign-key name="fos_invoice_item-fk_invoice" foreignTable="fos_invoice" phpName="Invoice" refPhpName="Item">
             <reference local="fk_invoice" foreign="id_invoice"/>
         </foreign-key>
         <foreign-key name="fos_invoice_item-fk_product_abstract" foreignTable="spy_product_abstract" phpName="AbstractProduct">

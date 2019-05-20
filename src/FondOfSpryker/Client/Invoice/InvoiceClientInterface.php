@@ -2,7 +2,7 @@
 
 namespace FondOfSpryker\Client\Invoice;
 
-use Generated\Shared\Transfer\InvoiceResponseTransfer;
+use Generated\Shared\Transfer\InvoiceListTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 
 interface InvoiceClientInterface
@@ -17,7 +17,7 @@ interface InvoiceClientInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceTransfer
      */
-    public function findInvoiceByOrderReference(InvoiceTransfer $invoiceTransfer): InvoiceResponseTransfer;
+    public function findInvoicesByCustomerReference(InvoiceListTransfer $invoiceListTransfer);
 
 
     /**

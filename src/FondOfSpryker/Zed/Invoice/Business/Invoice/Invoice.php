@@ -232,20 +232,16 @@ class Invoice implements InvoiceInterface
 
         $invoiceEntity->save();
 
-        //$this->addLocale($salesOrderEntity);
-
-
         return $invoiceEntity;
     }
 
-
     /**
-     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
-     * @param \Orm\Zed\Sales\Persistence\SpySalesOrder $salesOrderEntity
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     * @param \Orm\Zed\Invoice\Persistence\FosInvoice $invoiceEntity
      *
-     * @return void
+     * @throws
      */
-    protected function hydrateAddresses(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity)
+    protected function hydrateAddresses(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity): void
     {
         $billingAddressEntity = $this->saveInvoiceAddress($invoiceTransfer->getBillingAddress(), Address::ADDRESS_TYPE_BILLING);
         $shippingAddressEntity = $this->saveInvoiceAddress($invoiceTransfer->getShippingAddress(),Address::ADDRESS_TYPE_SHIPPING);
@@ -292,12 +288,14 @@ class Invoice implements InvoiceInterface
     }
 
     /**
-     * @param \Generated\Shared\Transfer\AddressTransfer $addressTransfer
-     * @param \Orm\Zed\Sales\Persistence\SpySalesOrderAddress $salesOrderAddressEntity
+     * @param \Generated\Shared\Transfer\InvoiceAddressTransfer $addressTransfer
+     * @param \Orm\Zed\Invoice\Persistence\FosInvoiceAddress $invoiceAddressEntity
+     * @param string $addressType
      *
-     * @return void
+     * @throws
      */
-    protected function hydrateInvoiceAddress(InvoiceAddressTransfer $addressTransfer, FosInvoiceAddress $invoiceAddressEntity, string $addressType)
+
+    protected function hydrateInvoiceAddress(InvoiceAddressTransfer $addressTransfer, FosInvoiceAddress $invoiceAddressEntity, string $addressType): void
     {
         $invoiceAddressEntity->fromArray($addressTransfer->toArray());
 
@@ -314,12 +312,12 @@ class Invoice implements InvoiceInterface
     }
 
     /**
-     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
-     * @param \Orm\Zed\Sales\Persistence\SpySalesOrder $salesOrderEntity
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     * @param \Orm\Zed\Invoice\Persistence\FosInvoice $invoiceEntity
      *
-     * @return void
+     * @throws
      */
-    protected function saveInvoiceItems(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity)
+    protected function saveInvoiceItems(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity): void
     {
 
         foreach ($invoiceTransfer->getItems() as $itemTransfer) {

@@ -2,6 +2,7 @@
 
 namespace FondOfSpryker\Client\Invoice;
 
+use Generated\Shared\Transfer\InvoiceListTransfer;
 use Generated\Shared\Transfer\InvoiceResponseTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 use Spryker\Client\Kernel\AbstractClient;
@@ -20,11 +21,11 @@ class InvoiceClient extends AbstractClient implements InvoiceClientInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
-    public function findInvoiceByOrderReference(InvoiceTransfer $invoiceTransfer): InvoiceResponseTransfer
+    public function findInvoicesByCustomerReference(InvoiceListTransfer $invoiceListTransfer)
     {
         return $this->getFactory()
             ->createZedInvoiceStub()
-            ->findInvoiceByOrderReference($invoiceTransfer);
+            ->findInvoicesByCustomerReference($invoiceListTransfer);
     }
 
 
