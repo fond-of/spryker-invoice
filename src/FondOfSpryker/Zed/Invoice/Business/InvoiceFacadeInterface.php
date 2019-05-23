@@ -8,6 +8,9 @@ use Generated\Shared\Transfer\InvoiceTransfer;
 interface InvoiceFacadeInterface
 {
     /**
+     * Specification:
+     * - find Invoices ByCustomerReference
+     *
      * @param \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer
      * @param string $customerReference
      *
@@ -19,12 +22,23 @@ interface InvoiceFacadeInterface
      * Specification:
      * - create Invoice
      *
-     * @api
-     *
      * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
      *
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
     public function createInvoice(InvoiceTransfer $invoiceTransfer);
+
+    /**
+     * Specification:
+     * - Checks if Invoice is Created
+     *
+     * @api
+     *
+     * @param int $idSalesOrder
+     * @param int $idSalesOrderItem
+     *
+     * @return bool
+     */
+    public function isInvoiceAppointed($idSalesOrder, $idSalesOrderItem);
 
 }

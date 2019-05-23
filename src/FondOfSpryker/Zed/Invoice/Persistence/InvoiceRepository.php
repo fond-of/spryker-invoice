@@ -3,6 +3,8 @@
 namespace FondOfSpryker\Zed\Invoice\Persistence;
 
 use Generated\Shared\Transfer\InvoiceListTransfer;
+use Generated\Shared\Transfer\InvoiceTransfer;
+use Orm\Zed\Invoice\Persistence\FosInvoice;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 
 /**
@@ -20,5 +22,17 @@ class InvoiceRepository extends AbstractRepository implements InvoiceRepositoryI
         return $this->getFactory()
             ->createInvoiceQuery()
             ->findByCustomerReference($customerReference);
+    }
+
+    /**
+     * @param int $idSalesOrder
+     *
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoice
+     */
+    public function findInvoicesByIdSalesOrder(int $idSalesOrder): ?FosInvoice
+    {
+        return $this->getFactory()
+            ->createInvoiceQuery()
+            ->findOneByFkSalesOrder($idSalesOrder);
     }
 }

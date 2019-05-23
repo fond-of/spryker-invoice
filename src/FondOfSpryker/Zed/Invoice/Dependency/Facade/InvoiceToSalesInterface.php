@@ -11,5 +11,5 @@ interface InvoiceToSalesInterface
      *
      * @return int
      */
-    public function findSalesOrderByOrderReference(string $orderReference): SpySalesOrder;
+    public function findSalesOrderByOrderReference(string $orderReference);
 }

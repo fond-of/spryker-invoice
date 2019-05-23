@@ -37,4 +37,33 @@ class InvoiceFacade extends AbstractFacade implements InvoiceFacadeInterface
             ->createInvoice()
             ->create($invoiceTransfer);
     }
+
+    /**
+     * Specification:
+     * - Checks if Invoice is Appointed
+     *
+     * @api
+     *
+     * @param int $idSalesOrder
+     * @param int $idSalesOrderItem
+     *
+     * @return bool
+     */
+    public function isInvoiceAppointed($idSalesOrder, $idSalesOrderItem)
+    {
+        return $this->getFactory()
+            ->createTransactionStatusManager()
+            ->isInvoiceAppointed($idSalesOrder, $idSalesOrderItem);
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     *
+     * @return bool
+     */
+    public function isCreateApproved(InvoiceTransfer $invoiceTransfer): bool
+    {
+        return true;
+
+    }
 }

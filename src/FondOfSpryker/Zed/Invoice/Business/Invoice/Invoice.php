@@ -122,7 +122,7 @@ class Invoice implements InvoiceInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
-    public function add($invoiceTransfer)
+    protected function add(InvoiceTransfer $invoiceTransfer): InvoiceResponseTransfer
     {
         $invoiceEntity = new FosInvoice();
         $invoiceEntity->fromArray($invoiceTransfer->toArray());

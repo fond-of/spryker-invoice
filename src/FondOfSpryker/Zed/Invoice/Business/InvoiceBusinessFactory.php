@@ -7,6 +7,8 @@ use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceReader;
 use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceReaderInterface;
 use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceValidator;
 use FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydrator;
+use FondOfSpryker\Zed\Invoice\Business\TransactionStatus\TransactionStatusUpdateManager;
+use FondOfSpryker\Zed\Invoice\Business\TransactionStatus\TransactionStatusUpdateManagerInterface;
 use FondOfSpryker\Zed\Invoice\InvoiceDependencyProvider;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 
@@ -50,6 +52,18 @@ class InvoiceBusinessFactory extends AbstractBusinessFactory
         );
 
         return $invoice;
+    }
+
+    /**
+     * @return \FondOfSpryker\Zed\Invoice\Business\TransactionStatus\TransactionStatusUpdateManager
+     */
+    public function createTransactionStatusManager(): TransactionStatusUpdateManagerInterface
+    {
+        return new TransactionStatusUpdateManager(
+            $this->getQueryContainer(),
+            $this->getRepository(),
+            $this->createInvoiceHydrator()
+        );
     }
 
     /**

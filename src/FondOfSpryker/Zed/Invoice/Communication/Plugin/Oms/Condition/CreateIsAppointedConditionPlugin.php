@@ -6,8 +6,7 @@ use Orm\Zed\Sales\Persistence\SpySalesOrderItem;
 use Spryker\Zed\Oms\Communication\Plugin\Oms\Condition\AbstractCondition;
 
 /**
- * @method \SprykerEco\Zed\Payone\Communication\PayoneCommunicationFactory getFactory()
- * @method \SprykerEco\Zed\Payone\Business\PayoneFacadeInterface getFacade()
+ * @method \FondOfSpryker\Zed\Invoice\Business\InvoiceFacadeInterface getFacade()
  */
 class CreateIsAppointedConditionPlugin extends AbstractCondition
 {
@@ -18,6 +17,9 @@ class CreateIsAppointedConditionPlugin extends AbstractCondition
      */
     public function check(SpySalesOrderItem $orderItem)
     {
-        return true;
+        $res = $this->getFacade()
+            ->isInvoiceAppointed($orderItem->getFkSalesOrder(), $orderItem->getIdSalesOrderItem());
+
+        return $res;
     }
 }

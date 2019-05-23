@@ -2,7 +2,8 @@
 
 namespace FondOfSpryker\Zed\Invoice\Persistence;
 
-use Generated\Shared\Transfer\InvoiceListTransfer;
+use Generated\Shared\Transfer\InvoiceTransfer;
+use Orm\Zed\Invoice\Persistence\FosInvoice;
 
 interface InvoiceRepositoryInterface
 {
@@ -13,4 +14,10 @@ interface InvoiceRepositoryInterface
      */
     public function findInvoicesByCustomerReference(string $customeReference);
 
+    /**
+     * @param int $idSalesOrder
+     *
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoice
+     */
+    public function findInvoicesByIdSalesOrder(int $idSalesOrder): ?FosInvoice;
 }

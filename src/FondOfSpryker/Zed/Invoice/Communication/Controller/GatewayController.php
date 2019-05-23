@@ -30,38 +30,6 @@ class GatewayController extends AbstractGatewayController
      */
     public function createAction(InvoiceTransfer $invoiceTransfer)
     {
-        $invoiceResponseTransfer = $this->getFacade()->createInvoice($invoiceTransfer);
-
-        $this->triggerEventsOnSuccess($invoiceResponseTransfer);
-
-        return $invoiceResponseTransfer;
-    }
-
-    /**
-     * @internal param TransactionStatusResponse $response
-     *
-     * @param \Generated\Shared\Transfer\PayoneTransactionStatusUpdateTransfer $transactionStatusUpdateTransfer
-     *
-     * @return void
-     */
-    protected function triggerEventsOnSuccess(InvoiceResponseTransfer $invoiceResponseTransfer)
-    {
-        if (!$invoiceResponseTransfer->getIsSuccess()) {
-            return;
-        }
-
-        $orderItems = SpySalesOrderItemQuery::create()
-            ->useOrderQuery()
-            ->useSpyPaymentPayoneQuery()
-            ->filterByTransactionId($transactionStatusUpdateTransfer->getTxid())
-            ->endUse()
-            ->endUse()
-            ->find();
-
-        $this->getFactory()->getOmsFacade()->triggerEvent('InvoiceNotificationReceived', $orderItems, []);
-
-        if ($transactionStatusUpdateTransfer->getTxaction() === PayoneConstants::PAYONE_TXACTION_APPOINTED) {
-            $this->getFactory()->getOmsFacade()->triggerEvent('RedirectResponseAppointed', $orderItems, []);
-        }
+        return $this->getFacade()->createInvoice($invoiceTransfer);
     }
 }

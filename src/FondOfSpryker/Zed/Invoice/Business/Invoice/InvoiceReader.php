@@ -7,6 +7,7 @@ use FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydratorInterface;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceEntityManagerInterface;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceRepositoryInterface;
 use Generated\Shared\Transfer\InvoiceListTransfer;
+use Generated\Shared\Transfer\InvoiceTransfer;
 use Orm\Zed\Locale\Persistence\SpyLocale;
 use Orm\Zed\Locale\Persistence\SpyLocaleQuery;
 use Propel\Runtime\Collection\ObjectCollection;

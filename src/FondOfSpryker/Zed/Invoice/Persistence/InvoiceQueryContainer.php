@@ -2,6 +2,7 @@
 
 namespace FondOfSpryker\Zed\Invoice\Persistence;
 
+use Orm\Zed\Invoice\Persistence\FosInvoice;
 use Orm\Zed\Invoice\Persistence\FosInvoiceQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractQueryContainer;
 
@@ -19,19 +20,25 @@ class InvoiceQueryContainer extends AbstractQueryContainer implements InvoiceQue
     }
 
     /**
-     * @api
      *
-     * @inheritdoc
+     * @param string $orderReference
+     *
+     * @return \Orm\Zed\Invoice\Persistence\SpyInvoiceQuery
+     *
      */
-    public function queryInvoiceByOrderReference($orderReference)
+    public function queryInvoiceByOrderReference(string $orderReference)
     {
-        $query = $this->queryInvoices();
-        $query
-            ->findOneByOrderReference($orderReference);
+        return $this->queryInvoices()->findOneByOrderReference($orderReference);
+    }
 
-
-
-        return $query;
+    /**
+     * @param int $idSalesOrder
+     *
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoice
+     */
+    public function queryInvoiceByIdSalesOrder(int $idSalesOrder): FosInvoice
+    {
+        return $this->queryInvoices()->findOneByFkSalesOrder($idSalesOrder);
     }
 
 }
