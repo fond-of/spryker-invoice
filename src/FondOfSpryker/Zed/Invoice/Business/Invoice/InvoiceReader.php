@@ -4,6 +4,7 @@ namespace FondOfSpryker\Zed\Invoice\Business\Invoice;
 
 use ArrayObject;
 use FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydratorInterface;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToLocaleInterface;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceEntityManagerInterface;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceRepositoryInterface;
 use Generated\Shared\Transfer\InvoiceListTransfer;
@@ -20,6 +21,11 @@ class InvoiceReader implements InvoiceReaderInterface
     protected $invoiceEntityManager;
 
     /**
+     * @var \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToLocaleInterface
+     */
+    protected $localeFacade;
+
+    /**
      * @var \FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydratorInterface
      */
     protected $invoiceHydrator;
@@ -30,10 +36,15 @@ class InvoiceReader implements InvoiceReaderInterface
     protected $invoiceRepository;
 
     /**
+     * InvoiceReader constructor.
+     *
+     * @param \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToLocaleInterface $invoiceToLocale
      * @param \FondOfSpryker\Zed\Invoice\Persistence\InvoiceEntityManagerInterface $invoiceEntityManager
+     * @param \FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydratorInterface $invoiceHydrator
      * @param \FondOfSpryker\Zed\Invoice\Persistence\InvoiceRepositoryInterface $invoiceRepository
      */
     public function __construct(
+        InvoiceToLocaleInterface $localeFacade,
         InvoiceEntityManagerInterface $invoiceEntityManager,
         InvoiceHydratorInterface $invoiceHydrator,
         InvoiceRepositoryInterface $invoiceRepository
@@ -41,6 +52,7 @@ class InvoiceReader implements InvoiceReaderInterface
         $this->invoiceEntityManager = $invoiceEntityManager;
         $this->invoiceHydrator = $invoiceHydrator;
         $this->invoiceRepository = $invoiceRepository;
+        $this->localeFacade = $localeFacade;
     }
 
     /**
@@ -63,6 +75,8 @@ class InvoiceReader implements InvoiceReaderInterface
      * @param \Propel\Runtime\Collection\ObjectCollection $orderCollection
      *
      * @return \ArrayObject|\Generated\Shared\Transfer\OrderTransfer[]
+     *
+     * @throws 
      */
     protected function hydrateInvoiceListCollectionTransferFromEntityCollection(ObjectCollection $orderCollection): ArrayObject
     {
@@ -70,33 +84,20 @@ class InvoiceReader implements InvoiceReaderInterface
 
         /** @var \Orm\Zed\Invoice\Persistence\Base\FosInvoice $invoiceEntity */
         foreach ($orderCollection as $invoiceEntity) {
-
             if ($invoiceEntity->countItems() === 0) {
                 continue;
             }
 
             $invoiceTransfer = $this->invoiceHydrator->hydrateInvoiceTransferFromPersistenceByInvoice($invoiceEntity);
             $invoiceTransfer->setCurrency($invoiceEntity->getCurrencyIsoCode());
-            $invoiceTransfer->setLocale($this->getLocaleNameById($invoiceEntity->getFkLocale()));
+            $invoiceTransfer->setLocale(
+                $this->localeFacade->getLocaleByIdLocale($invoiceEntity->getFkLocale())->getLocaleName()
+            );
 
             $invoices->append($invoiceTransfer);
         }
 
         return $invoices;
     }
-
-    /**
-     * @param int $idLocale
-     * @return string
-     *
-     * @throws
-     */
-    protected function getLocaleNameById(int $idLocale): string
-    {
-        $localeEntity = SpyLocaleQuery::create()
-            ->filterByIdLocale($idLocale)
-            ->findOne();
-
-        return $localeEntity->getLocaleName();
-    }
+    
 }

@@ -26,6 +26,7 @@ class InvoiceBusinessFactory extends AbstractBusinessFactory
     public function createInvoiceReader(): InvoiceReaderInterface
     {
         return new InvoiceReader(
+            $this->getLocaleFacade(),
             $this->getEntityManager(),
             $this->createInvoiceHydrator(),
             $this->getRepository()
@@ -125,6 +126,14 @@ class InvoiceBusinessFactory extends AbstractBusinessFactory
     protected function getCountryFacade()
     {
         return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_COUNTRY);
+    }
+
+    /**
+     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryInterface
+     */
+    protected function getLocaleFacade()
+    {
+        return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_LOCALE);
     }
 
     /**

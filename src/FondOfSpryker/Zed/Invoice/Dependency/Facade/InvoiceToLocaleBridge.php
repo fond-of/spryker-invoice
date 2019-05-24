@@ -2,6 +2,8 @@
 
 namespace FondOfSpryker\Zed\Invoice\Dependency\Facade;
 
+use Generated\Shared\Transfer\LocaleTransfer;
+
 class InvoiceToLocaleBridge implements InvoiceToLocaleInterface
 {
     /**
@@ -16,5 +18,18 @@ class InvoiceToLocaleBridge implements InvoiceToLocaleInterface
     {
         $this->localeFacade = $localeFacade;
     }
+
+    /**
+     * @param int $idLocale
+     *
+     * @return \Generated\Shared\Transfer\LocaleTransfer
+     *
+     * @throws
+     */
+    public function getLocaleByIdLocale(int $idLocale): LocaleTransfer
+    {
+        return $this->localeFacade->getLocaleById($idLocale);
+    }
+
 
 }
