@@ -100,29 +100,14 @@ class Invoice implements InvoiceInterface
         $this->postInvoiceCreatePlugins = $postInvoiceCreatePlugins;
     }
 
-
     /**
      * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
-     *
+     * @param array $invoiceItemCollection
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
-     */
-    public function create(InvoiceTransfer $invoiceTransfer)
-    {
-        $invoiceResponseTransfer = $this->add($invoiceTransfer);
-
-        if (!$invoiceResponseTransfer->getIsSuccess()) {
-            return $invoiceResponseTransfer;
-        }
-
-        return $invoiceResponseTransfer;
-    }
-
-    /**
-     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
      *
-     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function add(InvoiceTransfer $invoiceTransfer): InvoiceResponseTransfer
+    public function add(InvoiceTransfer $invoiceTransfer, array $invoiceItemCollection): InvoiceResponseTransfer
     {
         $invoiceEntity = new FosInvoice();
         $invoiceEntity->fromArray($invoiceTransfer->toArray());
@@ -134,14 +119,37 @@ class Invoice implements InvoiceInterface
             return $invoiceResponseTransfer;
         }
 
-        $this->saveInvoiceTransaction($invoiceTransfer);
+        $invoiceEntity = $this->saveInvoiceTransaction($invoiceTransfer);
 
+        $invoiceTransfer->setIdInvoice($invoiceEntity->getPrimaryKey());
+        $invoiceTransfer->setCreatedAt($invoiceEntity->getCreatedAt()->format("Y-m-d H:i:s.u"));
+        $invoiceTransfer->setUpdatedAt($invoiceEntity->getUpdatedAt()->format("Y-m-d H:i:s.u"));
 
         $invoiceResponseTransfer
             ->setIsSuccess(true)
             ->setInvoiceTransfer($invoiceTransfer);
 
         return $invoiceResponseTransfer;
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     *
+     * @return \Generated\Shared\Transfer\InvoiceTransfer
+     */
+    public function findById(InvoiceTransfer $invoiceTransfer): InvoiceTransfer
+    {
+        $invoiceEntity = $this->queryContainer
+            ->queryInvoiceById($invoiceTransfer->getIdInvoice())
+            ->findOne();
+
+        if ($invoiceEntity === null) {
+            return null;
+        }
+
+        $invoiceTransfer = $this->hydrateInvoiceTransferFromEntity($invoiceTransfer, $invoiceEntity);
+
+        return $invoiceTransfer;
     }
 
     /**
@@ -227,7 +235,6 @@ class Invoice implements InvoiceInterface
     protected function saveInvoiceEntity(InvoiceTransfer $invoiceTransfer)
     {
         $invoiceEntity = $this->createInvoiceEntity();
-        $this->hydrateAddresses($invoiceTransfer, $invoiceEntity);
         $this->hydrateInvoiceEntity($invoiceTransfer, $invoiceEntity);
 
         $invoiceEntity->save();
@@ -241,74 +248,19 @@ class Invoice implements InvoiceInterface
      *
      * @throws
      */
-    protected function hydrateAddresses(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity): void
-    {
-        $billingAddressEntity = $this->saveInvoiceAddress($invoiceTransfer->getBillingAddress(), Address::ADDRESS_TYPE_BILLING);
-        $shippingAddressEntity = $this->saveInvoiceAddress($invoiceTransfer->getShippingAddress(),Address::ADDRESS_TYPE_SHIPPING);
-
-        $invoiceEntity->setBillingAddress($billingAddressEntity);
-        $invoiceEntity->setShippingAddress($shippingAddressEntity);
-    }
-
-
-    /**
-     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
-     * @param \Orm\Zed\Invoice\Persistence\FosInvoice $invoiceEntity
-     *
-     * @throws
-     */
     protected function hydrateInvoiceEntity(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity): void
     {
+        $orderTransfer = $this->salesFacade->findSalesOrderByOrderReference($invoiceTransfer->getOrderReference());
+        
         $invoiceEntity->setFkSalesOrder($this->getIdSalesOrder($invoiceTransfer->getOrderReference()));
         $invoiceEntity->setOrderReference($invoiceTransfer->getOrderReference());
         $invoiceEntity->setCustomerReference($invoiceTransfer->getCustomerReference());
-        $invoiceEntity->setFkInvoiceAddressBilling($invoiceEntity->getBillingAddress()->getIdInvoiceAddress());
-        $invoiceEntity->setFkInvoiceAddressShipping($invoiceEntity->getShippingAddress()->getIdInvoiceAddress());
+        $invoiceEntity->setFkSalesOrderAddressBilling($orderTransfer->getBillingAddress()->getIdSalesOrderAddress());
+        $invoiceEntity->setFkSalesOrderAddressShipping($orderTransfer->getShippingAddress()->getIdSalesOrderAddress());
         $invoiceEntity->setPaymentMethod($invoiceTransfer->getPayment()->getCode());
         $invoiceEntity->setStore($invoiceTransfer->getStore());
         $invoiceEntity->setFkLocale($this->getIdLocale($invoiceTransfer));
         $invoiceEntity->setCurrencyIsoCode($invoiceTransfer->getCurrency());
-    }
-
-
-    /**
-     * @param \Generated\Shared\Transfer\InvoiceAddressTransfer $addressTransfer
-     *
-     * @return \Orm\Zed\Invoice\Persistence\FosInvoiceAddress
-     */
-    protected function saveInvoiceAddress(InvoiceAddressTransfer $addressTransfer, string $addressType)
-    {
-        $invoiceAddressEntity = $this->createInvoiceAddressEntity();
-        $this->hydrateInvoiceAddress($addressTransfer, $invoiceAddressEntity, $addressType);
-        $invoiceAddressEntity->save();
-
-        $addressTransfer->setIdInvoiceAddress($invoiceAddressEntity->getIdInvoiceAddress());
-
-        return $invoiceAddressEntity;
-    }
-
-    /**
-     * @param \Generated\Shared\Transfer\InvoiceAddressTransfer $addressTransfer
-     * @param \Orm\Zed\Invoice\Persistence\FosInvoiceAddress $invoiceAddressEntity
-     * @param string $addressType
-     *
-     * @throws
-     */
-
-    protected function hydrateInvoiceAddress(InvoiceAddressTransfer $addressTransfer, FosInvoiceAddress $invoiceAddressEntity, string $addressType): void
-    {
-        $invoiceAddressEntity->fromArray($addressTransfer->toArray());
-
-        $invoiceAddressEntity->setType($addressType);
-        $invoiceAddressEntity->setFkCountry(
-            $this->countryFacade->getCountryByIso2Code($addressTransfer->getCountry())->getIdCountry()
-        );
-
-        if ($addressTransfer->getRegion() != null) {
-            $invoiceAddressEntity->setFkRegion(
-                $this->countryFacade->getIdRegionByIso2Code($addressTransfer->getRegion())
-            );
-        }
     }
 
     /**
@@ -319,12 +271,10 @@ class Invoice implements InvoiceInterface
      */
     protected function saveInvoiceItems(InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity): void
     {
-
         foreach ($invoiceTransfer->getItems() as $itemTransfer) {
             $invoiceItemEntity = $this->createInvoiceItemEntity();
             $this->hydrateInvoiceItemEntity($invoiceEntity, $invoiceTransfer, $invoiceItemEntity, $itemTransfer);
 
-            //$invoiceItemEntity = $this->executInvoiceItemExpanderPreSavePlugins($invoiceTransfer, $itemTransfer, $invoiceItemEntity);
             $invoiceItemEntity->save();
         }
     }
@@ -344,15 +294,9 @@ class Invoice implements InvoiceInterface
         InvoiceItemTransfer $itemTransfer
     ) {
         $invoiceItemEntity->fromArray($itemTransfer->toArray());
-
-
         $invoiceItemEntity->setFkInvoice($invoiceEntity->getIdInvoice());
         $invoiceItemEntity->setFkProductAbstract($this->getIdProductAbstractByConcreteSku($itemTransfer->getSku()));
         $invoiceItemEntity->setFkProduct($this->getIdProductConcreteBySku($itemTransfer->getSku()));
-
-        /*$invoiceItemEntity->setFkOmsInvoiceItemState($initialStateEntity->getIdOmsInvoiceItemState());
-
-        $invoiceItemEntity->setProcess($processEntity);*/
     }
 
     /**
@@ -402,6 +346,18 @@ class Invoice implements InvoiceInterface
     protected function getIdProductConcreteBySku(string $sku): int
     {
         return $this->productFacade->findProductConcreteIdBySku($sku);
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     * @param \Orm\Zed\Invoice\Persistence\FosInvoice $invoiceEntity
+     *
+     * @return \Generated\Shared\Transfer\InvoiceTransfer
+     */
+    protected function hydrateInvoiceTransferFromEntity( InvoiceTransfer $invoiceTransfer, FosInvoice $invoiceEntity ): InvoiceTransfer {
+        $invoiceTransfer->fromArray($invoiceEntity->toArray(), true);
+
+        return $invoiceTransfer;
     }
 
     /**

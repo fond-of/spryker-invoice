@@ -2,14 +2,14 @@
 
 namespace FondOfSpryker\Zed\Invoice\Dependency\Facade;
 
-use Orm\Zed\Sales\Persistence\SpySalesOrder;
+use Generated\Shared\Transfer\OrderTransfer;
 
 interface InvoiceToSalesInterface
 {
     /**
      * @param string $orderReference
      *
-     * @return int
+     * @return \Generated\Shared\Transfer\OrderTransfer
      */
-    public function findSalesOrderByOrderReference(string $orderReference);
+    public function findSalesOrderByOrderReference(string $orderReference): OrderTransfer;
 }

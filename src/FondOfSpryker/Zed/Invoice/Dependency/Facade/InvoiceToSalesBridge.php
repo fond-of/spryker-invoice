@@ -2,6 +2,7 @@
 
 namespace FondOfSpryker\Zed\Invoice\Dependency\Facade;
 
+use Generated\Shared\Transfer\OrderTransfer;
 use Orm\Zed\Sales\Persistence\SpySalesOrder;
 
 class InvoiceToSalesBridge implements InvoiceToSalesInterface
@@ -22,9 +23,9 @@ class InvoiceToSalesBridge implements InvoiceToSalesInterface
     /**
      * @param string $orderReference
      *
-     * @return int
+     * @return \Generated\Shared\Transfer\OrderTransfer
      */
-    public function findSalesOrderByOrderReference(string $orderReference)
+    public function findSalesOrderByOrderReference(string $orderReference): OrderTransfer
     {
         return $this->salesFacade->findSalesOrderByOrderReference($orderReference);
     }

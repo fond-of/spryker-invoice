@@ -3,6 +3,7 @@
 namespace FondOfSpryker\Zed\Invoice\Business;
 
 use Generated\Shared\Transfer\InvoiceListTransfer;
+use Generated\Shared\Transfer\InvoiceResponseTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 
 interface InvoiceFacadeInterface
@@ -26,7 +27,14 @@ interface InvoiceFacadeInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
-    public function createInvoice(InvoiceTransfer $invoiceTransfer);
+    public function addInvoice(InvoiceTransfer $invoiceTransfer,  array $creditmemoItemCollection): InvoiceResponseTransfer;
+
+    /**
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     *
+     * @return \Generated\Shared\Transfer\InvoiceTransfer
+     */
+    public function findInvoiceById(InvoiceTransfer $invoiceTransfer): InvoiceTransfer;
 
     /**
      * Specification:

@@ -19,7 +19,6 @@ interface InvoiceClientInterface
      */
     public function findInvoicesByCustomerReference(InvoiceListTransfer $invoiceListTransfer);
 
-
     /**
      * Specification:
      * - create an Invoice

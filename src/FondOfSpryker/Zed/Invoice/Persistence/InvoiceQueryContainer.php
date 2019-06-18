@@ -41,4 +41,18 @@ class InvoiceQueryContainer extends AbstractQueryContainer implements InvoiceQue
         return $this->queryInvoices()->findOneByFkSalesOrder($idSalesOrder);
     }
 
+    /**
+     * @param int $idInvoice
+     * @return \Orm\Zed\Invoice\Persistence\FosInvoiceQuery
+     *
+     * @throws \Spryker\Zed\Propel\Business\Exception\AmbiguousComparisonException
+     */
+    public function queryInvoiceById(int $idInvoice): FosInvoiceQuery
+    {
+        $query = $this->queryInvoices();
+        $query->filterByIdInvoice($idInvoice);
+
+        return $query;
+    }
+
 }

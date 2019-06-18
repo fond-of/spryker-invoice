@@ -3,6 +3,7 @@
 namespace FondOfSpryker\Zed\Invoice\Business;
 
 use Generated\Shared\Transfer\InvoiceListTransfer;
+use Generated\Shared\Transfer\InvoiceResponseTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 use Spryker\Zed\Kernel\Business\AbstractFacade;
 
@@ -31,12 +32,25 @@ class InvoiceFacade extends AbstractFacade implements InvoiceFacadeInterface
      *
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
-    public function createInvoice(InvoiceTransfer $invoiceTransfer)
+    public function addInvoice(InvoiceTransfer $invoiceTransfer,  array $creditmemoItemCollection): InvoiceResponseTransfer
     {
         return $this->getFactory()
             ->createInvoice()
-            ->create($invoiceTransfer);
+            ->add($invoiceTransfer, $creditmemoItemCollection);
     }
+
+    /**
+     * @param \Generated\Shared\Transfer\CreditmemoTransfer $creditmemoTransfer
+     *
+     * @return \Generated\Shared\Transfer\CreditmemoTransfer
+     */
+    public function findInvoiceById(InvoiceTransfer $invoiceTransfer): InvoiceTransfer
+    {
+        return $this->getFactory()
+            ->createInvoice()
+            ->findById($invoiceTransfer);
+    }
+
 
     /**
      * Specification:
