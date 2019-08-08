@@ -24,7 +24,7 @@
     "php": ">=7.1",
     "fond-of-spryker/country": "^1.0",
     "spryker/invoice": "~2.0.1",
-    "fond-of-spryker/sales": "^1.1.0"
+    "fond-of-spryker/sales": "~2.0.0"
   },
   "require-dev": {
     "spryker/code-sniffer": "^0.11",
