@@ -2,48 +2,39 @@
 
 namespace FondOfSpryker\Zed\Invoice;
 
-use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryBridge;
-use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToLocaleBridge;
-use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToProductBridge;
-use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSalesBridge;
+use FondOfSpryker\Zed\Invoice\Communication\Plugin\InvoiceExtension\AddressInvoicePreSavePlugin;
+use FondOfSpryker\Zed\Invoice\Communication\Plugin\InvoiceExtension\ItemsInvoicePostSavePlugin;
+use FondOfSpryker\Zed\Invoice\Communication\Plugin\InvoiceExtension\ReferenceInvoicePreSavePlugin;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSequenceNumberFacadeBridge;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToStoreFacadeBridge;
 use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
-use Spryker\Shared\Kernel\Store;
 use Spryker\Zed\Kernel\Container;
-
 
 /**
  * @method \FondOfSpryker\Zed\Invoice\InvoiceConfig getConfig()
  */
 class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
 {
-    public const FACADE_COUNTRY = 'FACADE_COUNTRY';
-    public const FACADE_LOCALE = 'FACADE_LOCALE';
-    public const FACADE_OMS = 'FACADE_OMS';
-    public const FACADE_PRODUCT = 'FACADE_PRODUCT';
-    public const FACADE_SALES = 'FACADE_SALES';
+    public const FACADE_SEQUENCE_NUMBER = 'FACADE_SEQUENCE_NUMBER';
+    public const FACADE_STORE = 'FACADE_STORE';
 
-    public const PLUGINS_POST_INVOICE_CREATE = 'PLUGINS_POST_INVOICE_CREATE';
-
-    public const QUERY_CONTAINER_LOCALE = 'QUERY_CONTAINER_LOCALE';
-    public const QUERY_CONTAINER_SALES = 'QUERY_CONTAINER_SALES';
-
-    public const STORE = 'STORE';
+    public const PLUGINS_POST_SAVE = 'PLUGINS_POST_SAVE';
+    public const PLUGINS_PRE_SAVE = 'PLUGINS_PRE_SAVE';
 
     /**
      * @param \Spryker\Zed\Kernel\Container $container
      *
      * @return \Spryker\Zed\Kernel\Container
      */
-    public function provideBusinessLayerDependencies(Container $container)
+    public function provideBusinessLayerDependencies(Container $container): Container
     {
-        $container = $this->addLocaleQueryConainer($container);
-        $container = $this->addSalesQueryConainer($container);
-        $container = $this->addStore($container);
-        $container = $this->addCountryFacade($container);
-        $container = $this->addLocaleFacade($container);
-        $container = $this->addProductFacade($container);
-        $container = $this->addSalesFacade($container);
-        $container = $this->addPostInvoiceCreatePlugins($container);
+        $container = parent::provideBusinessLayerDependencies($container);
+
+        $container = $this->addSequenceNumberFacade($container);
+        $container = $this->addStoreFacade($container);
+
+        $container = $this->addInvoicePreSavePlugins($container);
+        $container = $this->addInvoicePostSavePlugins($container);
 
         return $container;
     }
@@ -53,25 +44,12 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
      *
      * @return \Spryker\Zed\Kernel\Container
      */
-    protected function addPostInvoiceCreatePlugins($container)
+    protected function addSequenceNumberFacade(Container $container): Container
     {
-        $container[static::PLUGINS_POST_INVOICE_CREATE] = function () {
-            return $this->getPostInvoiceCreatePlugins();
-        };
-
-        return $container;
-    }
-
-
-    /**
-     * @param \Spryker\Zed\Kernel\Container $container
-     *
-     * @return \Spryker\Zed\Kernel\Container
-     */
-    protected function addStore(Container $container)
-    {
-        $container[static::STORE] = function (Container $container) {
-            return Store::getInstance();
+        $container[static::FACADE_SEQUENCE_NUMBER] = static function (Container $container) {
+            return new InvoiceToSequenceNumberFacadeBridge(
+                $container->getLocator()->sequenceNumber()->facade()
+            );
         };
 
         return $container;
@@ -82,10 +60,12 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
      *
      * @return \Spryker\Zed\Kernel\Container
      */
-    protected function addLocaleFacade(Container $container)
+    protected function addStoreFacade(Container $container): Container
     {
-        $container[static::FACADE_LOCALE] = function (Container $container) {
-            return new InvoiceToLocaleBridge($container->getLocator()->locale()->facade());
+        $container[static::FACADE_STORE] = static function (Container $container) {
+            return new InvoiceToStoreFacadeBridge(
+                $container->getLocator()->store()->facade()
+            );
         };
 
         return $container;
@@ -96,13 +76,26 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
      *
      * @return \Spryker\Zed\Kernel\Container
      */
-    protected function addProductFacade(Container $container)
+    protected function addInvoicePreSavePlugins(Container $container): Container
     {
-        $container[static::FACADE_PRODUCT] = function (Container $container) {
-            return new InvoiceToProductBridge($container->getLocator()->product()->facade());
+        $self = $this;
+
+        $container[static::PLUGINS_PRE_SAVE] = static function () use ($self) {
+            return $self->getInvoicePreSavePlugins();
         };
 
         return $container;
+    }
+
+    /**
+     * @return \FondOfSpryker\Zed\InvoiceExtension\Dependency\Plugin\InvoicePreSavePluginInterface[]
+     */
+    protected function getInvoicePreSavePlugins(): array
+    {
+        return [
+            new AddressInvoicePreSavePlugin(),
+            new ReferenceInvoicePreSavePlugin(),
+        ];
     }
 
     /**
@@ -110,64 +103,24 @@ class InvoiceDependencyProvider extends AbstractBundleDependencyProvider
      *
      * @return \Spryker\Zed\Kernel\Container
      */
-    protected function addCountryFacade(Container $container): Container
+    protected function addInvoicePostSavePlugins(Container $container): Container
     {
-        $container[static::FACADE_COUNTRY] = function (Container $container) {
-            return new InvoiceToCountryBridge($container->getLocator()->country()->facade());
+        $self = $this;
+
+        $container[static::PLUGINS_POST_SAVE] = static function () use ($self) {
+            return $self->getInvoicePostSavePlugins();
         };
 
         return $container;
     }
 
     /**
-     * @param \Spryker\Zed\Kernel\Container $container
-     *
-     * @return \Spryker\Zed\Kernel\Container
+     * @return \FondOfSpryker\Zed\InvoiceExtension\Dependency\Plugin\InvoicePostSavePluginInterface[]
      */
-    protected function addSalesFacade(Container $container): Container
+    protected function getInvoicePostSavePlugins(): array
     {
-        $container[static::FACADE_SALES] = function (Container $container) {
-            return new InvoiceToSalesBridge($container->getLocator()->sales()->facade());
-        };
-
-        return $container;
+        return [
+            new ItemsInvoicePostSavePlugin(),
+        ];
     }
-
-    /**
-     * @param \Spryker\Zed\Kernel\Container $container
-     *
-     * @return \Spryker\Zed\Kernel\Container
-     */
-    protected function addLocaleQueryConainer(Container $container): Container
-    {
-        $container[static::QUERY_CONTAINER_LOCALE] = function (Container $container) {
-            return $container->getLocator()->locale()->queryContainer();
-        };
-
-        return $container;
-    }
-
-    /**
-     * @param \Spryker\Zed\Kernel\Container $container
-     *
-     * @return \Spryker\Zed\Kernel\Container
-     */
-    protected function addSalesQueryConainer(Container $container): Container
-    {
-        $container[static::QUERY_CONTAINER_SALES] = function (Container $container) {
-            return $container->getLocator()->sales()->queryContainer();
-        };
-
-        return $container;
-    }
-
-
-    /**
-     * @return \FondOfSpryker\Zed\InvoiceExtension\Dependency\Plugin\PostInvoiceCreatePluginInterface[]
-     */
-    protected function getPostInvoiceCreatePlugins(): array
-    {
-        return [];
-    }
-
 }
