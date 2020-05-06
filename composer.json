@@ -22,17 +22,20 @@
   ],
   "require": {
     "php": ">=7.1",
-    "fond-of-spryker/country": "dev-master",
-    "spryker/invoice": "~2.0.1",
-    "fond-of-spryker/sales": "dev-master"
+    "fond-of-spryker/invoice-extension": "dev-master",
+    "spryker/invoice": "^0.20.0 || ^1.0.0 || ^2.0.0",
+    "spryker/oms": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^10.0.0 || ^11.0.0",
+    "spryker/sequence-number": "^1.0.0 || ^2.0.0 || ^3.0.0",
+    "spryker/store": "^1.1.0"
   },
   "require-dev": {
-    "spryker/code-sniffer": "^0.11",
-    "spryker/development": "^3.6",
+    "fond-of-codeception/spryker": "dev-master as 1.0.0",
     "codeception/codeception": "^2.3",
     "mikey179/vfsstream": "^1.6",
     "phpro/grumphp": "^0.14",
-    "sebastian/phpcpd": "^4.0"
+    "sebastian/phpcpd": "^4.0",
+    "spryker/code-sniffer": "^0.11",
+    "spryker/development": "^3.6"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,

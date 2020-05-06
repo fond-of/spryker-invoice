@@ -2,9 +2,7 @@
 
 namespace FondOfSpryker\Zed\Invoice\Persistence;
 
-use Generated\Shared\Transfer\InvoiceListTransfer;
-use Generated\Shared\Transfer\InvoiceTransfer;
-use Orm\Zed\Invoice\Persistence\FosInvoice;
+use Generated\Shared\Transfer\ItemTransfer;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 
 /**
@@ -13,26 +11,24 @@ use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 class InvoiceRepository extends AbstractRepository implements InvoiceRepositoryInterface
 {
     /**
-     * @param string $customerReference
-     * @return
-     * @throws \Exception
-     */
-    public function findInvoicesByCustomerReference(string $customerReference)
-    {
-        return $this->getFactory()
-            ->createInvoiceQuery()
-            ->findByCustomerReference($customerReference);
-    }
-
-    /**
-     * @param int $idSalesOrder
+     * @param int $idSalesOrderItem
      *
-     * @return \Orm\Zed\Invoice\Persistence\FosInvoice
+     * @return \Generated\Shared\Transfer\ItemTransfer|null
      */
-    public function findInvoicesByIdSalesOrder(int $idSalesOrder): ?FosInvoice
+    public function findInvoiceItemByIdSalesOrderItem(int $idSalesOrderItem): ?ItemTransfer
     {
-        return $this->getFactory()
-            ->createInvoiceQuery()
-            ->findOneByFkSalesOrder($idSalesOrder);
+        $fosInvoiceItemQuery = $this->getFactory()->createInvoiceItemQuery();
+
+        $fosInvoiceItem = $fosInvoiceItemQuery->filterByFkSalesOrderItem($idSalesOrderItem)
+            ->findOne();
+
+        if ($fosInvoiceItem === null) {
+            return null;
+        }
+
+        return $this->getFactory()->createInvoiceItemMapper()->mapEntityToTransfer(
+            $fosInvoiceItem,
+            new ItemTransfer()
+        );
     }
 }

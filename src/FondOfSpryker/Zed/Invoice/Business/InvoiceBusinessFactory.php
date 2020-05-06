@@ -2,153 +2,107 @@
 
 namespace FondOfSpryker\Zed\Invoice\Business;
 
-use FondOfSpryker\Zed\Invoice\Business\Invoice\Invoice;
-use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceReader;
-use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceReaderInterface;
-use FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceValidator;
-use FondOfSpryker\Zed\Invoice\Business\Model\Invoice\InvoiceHydrator;
-use FondOfSpryker\Zed\Invoice\Business\TransactionStatus\TransactionStatusUpdateManager;
-use FondOfSpryker\Zed\Invoice\Business\TransactionStatus\TransactionStatusUpdateManagerInterface;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoiceAddressWriter;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoiceAddressWriterInterface;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoiceItemsWriter;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoiceItemsWriterInterface;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoicePluginExecutor;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoicePluginExecutorInterface;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoiceReferenceGenerator;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoiceReferenceGeneratorInterface;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoiceWriter;
+use FondOfSpryker\Zed\Invoice\Business\Model\InvoiceWriterInterface;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSequenceNumberFacadeInterface;
+use FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToStoreFacadeInterface;
 use FondOfSpryker\Zed\Invoice\InvoiceDependencyProvider;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 
 /**
  * @method \FondOfSpryker\Zed\Invoice\InvoiceConfig getConfig()
- * @method \FondOfSpryker\Zed\Invoice\Persistence\InvoiceQueryContainerInterface getQueryContainer()
  * @method \FondOfSpryker\Zed\Invoice\Persistence\InvoiceEntityManagerInterface getEntityManager()
  * @method \FondOfSpryker\Zed\Invoice\Persistence\InvoiceRepositoryInterface getRepository()
  */
 class InvoiceBusinessFactory extends AbstractBusinessFactory
 {
     /**
-     * @return \FondOfSpryker\Zed\Invoice\Business\Invoice\InvoiceReaderInterface
+     * @return \FondOfSpryker\Zed\Invoice\Business\Model\InvoiceWriterInterface
      */
-    public function createInvoiceReader(): InvoiceReaderInterface
+    public function createInvoiceWriter(): InvoiceWriterInterface
     {
-        return new InvoiceReader(
-            $this->getLocaleFacade(),
+        return new InvoiceWriter(
             $this->getEntityManager(),
-            $this->createInvoiceHydrator(),
-            $this->getRepository()
+            $this->createInvoicePluginExecutor()
         );
     }
 
     /**
-     * @return \Spryker\Zed\Invoice\Business\Invoice\InvoiceInterface
+     * @return \FondOfSpryker\Zed\Invoice\Business\Model\InvoicePluginExecutorInterface
      */
-    public function createInvoice()
+    protected function createInvoicePluginExecutor(): InvoicePluginExecutorInterface
     {
-        $config = $this->getConfig();
-
-        $invoice = new Invoice(
-            $this->getProductFacade(),
-            $this->getSalesFacade(),
-            $this->getCountryFacade(),
-            $this->getQueryContainer(),
-            $config,
-            $this->createInvoiceValidator(),
-            $this->getLocaleQueryContainer(),
-            $this->getStore(),
-            $this->getPostCustomerRegistrationPlugins()
-        );
-
-        return $invoice;
-    }
-
-    /**
-     * @return \FondOfSpryker\Zed\Invoice\Business\TransactionStatus\TransactionStatusUpdateManager
-     */
-    public function createTransactionStatusManager(): TransactionStatusUpdateManagerInterface
-    {
-        return new TransactionStatusUpdateManager(
-            $this->getQueryContainer(),
-            $this->getRepository(),
-            $this->createInvoiceHydrator()
+        return new InvoicePluginExecutor(
+            $this->getInvoicePreSavePlugins(),
+            $this->getInvoicePostSavePlugins()
         );
     }
 
     /**
-     * @return \Spryker\Zed\Locale\Persistence\LocaleQueryContainerInterface
+     * @return \FondOfSpryker\Zed\Invoice\Business\Model\InvoiceAddressWriterInterface
      */
-    protected function getLocaleQueryContainer()
+    public function createInvoiceAddressWriter(): InvoiceAddressWriterInterface
     {
-        return $this->getProvidedDependency(InvoiceDependencyProvider::QUERY_CONTAINER_LOCALE);
+        return new InvoiceAddressWriter($this->getEntityManager());
     }
 
     /**
-     * @return \Spryker\Shared\Kernel\Store
+     * @return \FondOfSpryker\Zed\Invoice\Business\Model\InvoiceItemsWriterInterface
      */
-    protected function getStore()
+    public function createInvoiceItemsWriter(): InvoiceItemsWriterInterface
     {
-        return $this->getProvidedDependency(InvoiceDependencyProvider::STORE);
+        return new InvoiceItemsWriter($this->getEntityManager());
     }
 
     /**
-     * @return \FondOfSpryker\Zed\InvoiceExtension\Dependency\Plugin\PostInvoiceRegistrationPluginInterface[]
+     * @return \FondOfSpryker\Zed\Invoice\Business\Model\InvoiceReferenceGeneratorInterface
      */
-    protected function getPostCustomerRegistrationPlugins()
+    public function createInvoiceReferenceGenerator(): InvoiceReferenceGeneratorInterface
     {
-        return $this->getProvidedDependency(InvoiceDependencyProvider::PLUGINS_POST_INVOICE_CREATE);
-    }
-
-    /**
-     * @return \Spryker\Zed\Customer\Business\Customer\EmailValidatorInterface
-     */
-    protected function createInvoiceValidator()
-    {
-        return new InvoiceValidator(
-            $this->getQueryContainer(),
-            $this->getSalesQueryContainer()
+        return new InvoiceReferenceGenerator(
+            $this->getSequenceNumberFacade(),
+            $this->getStoreFacade(),
+            $this->getConfig()
         );
     }
 
     /**
-     * @return \Spryker\Zed\Sales\Business\Model\Order\OrderHydratorInterface
+     * @return \FondOfSpryker\Zed\InvoiceExtension\Dependency\Plugin\InvoicePreSavePluginInterface]|
      */
-    public function createInvoiceHydrator()
+    protected function getInvoicePreSavePlugins(): array
     {
-        return new InvoiceHydrator(
-            $this->getQueryContainer()
-        );
+        return $this->getProvidedDependency(InvoiceDependencyProvider::PLUGINS_PRE_SAVE);
     }
 
     /**
-     * @return \Spryker\Zed\Sales\Persistence\LocaleQueryContainerInterface
+     * @return \FondOfSpryker\Zed\InvoiceExtension\Dependency\Plugin\InvoicePostSavePluginInterface[]
      */
-    protected function getSalesQueryContainer()
+    protected function getInvoicePostSavePlugins(): array
     {
-        return $this->getProvidedDependency(InvoiceDependencyProvider::QUERY_CONTAINER_SALES);
+        return $this->getProvidedDependency(InvoiceDependencyProvider::PLUGINS_POST_SAVE);
     }
 
     /**
-     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryInterface
+     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSequenceNumberFacadeInterface
      */
-    protected function getCountryFacade()
+    protected function getSequenceNumberFacade(): InvoiceToSequenceNumberFacadeInterface
     {
-        return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_COUNTRY);
+        return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_SEQUENCE_NUMBER);
     }
 
     /**
-     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToCountryInterface
+     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToStoreFacadeInterface
      */
-    protected function getLocaleFacade()
+    protected function getStoreFacade(): InvoiceToStoreFacadeInterface
     {
-        return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_LOCALE);
-    }
-
-    /**
-     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToProductInterface
-     */
-    protected function getProductFacade()
-    {
-        return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_PRODUCT);
-    }
-
-    /**
-     * @return \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSalesInterface
-     */
-    protected function getSalesFacade()
-    {
-        return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_SALES);
+        return $this->getProvidedDependency(InvoiceDependencyProvider::FACADE_STORE);
     }
 }

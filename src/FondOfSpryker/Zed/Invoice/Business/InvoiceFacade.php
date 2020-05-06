@@ -2,7 +2,6 @@
 
 namespace FondOfSpryker\Zed\Invoice\Business;
 
-use Generated\Shared\Transfer\InvoiceListTransfer;
 use Generated\Shared\Transfer\InvoiceResponseTransfer;
 use Generated\Shared\Transfer\InvoiceTransfer;
 use Spryker\Zed\Kernel\Business\AbstractFacade;
@@ -13,14 +12,16 @@ use Spryker\Zed\Kernel\Business\AbstractFacade;
 class InvoiceFacade extends AbstractFacade implements InvoiceFacadeInterface
 {
     /**
-     * @param \Generated\Shared\Transfer\InvoiceListTransfer $invoiceListTransfer
-     * @param string $customerReference
+     * {@inheritdoc}
      *
+     * @api
+     *
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
      * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
      */
-    public function findInvoicesByCustomerReference(InvoiceListTransfer $invoiceListTransfer, string $customerReference)
+    public function createInvoice(InvoiceTransfer $invoiceTransfer): InvoiceResponseTransfer
     {
-        return $this->getFactory()->createInvoiceReader()->findInvoicesByCustomerReference($invoiceListTransfer, $customerReference);
+        return $this->getFactory()->createInvoiceWriter()->create($invoiceTransfer);
     }
 
     /**
@@ -30,54 +31,36 @@ class InvoiceFacade extends AbstractFacade implements InvoiceFacadeInterface
      *
      * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
      *
-     * @return \Generated\Shared\Transfer\InvoiceResponseTransfer
+     * @return \Generated\Shared\Transfer\InvoiceTransfer
      */
-    public function addInvoice(InvoiceTransfer $invoiceTransfer,  array $creditmemoItemCollection): InvoiceResponseTransfer
+    public function createInvoiceAddress(InvoiceTransfer $invoiceTransfer): InvoiceTransfer
     {
-        return $this->getFactory()
-            ->createInvoice()
-            ->add($invoiceTransfer, $creditmemoItemCollection);
+        return $this->getFactory()->createInvoiceAddressWriter()->create($invoiceTransfer);
     }
 
     /**
-     * @param \Generated\Shared\Transfer\CreditmemoTransfer $creditmemoTransfer
-     *
-     * @return \Generated\Shared\Transfer\CreditmemoTransfer
-     */
-    public function findInvoiceById(InvoiceTransfer $invoiceTransfer): InvoiceTransfer
-    {
-        return $this->getFactory()
-            ->createInvoice()
-            ->findById($invoiceTransfer);
-    }
-
-
-    /**
-     * Specification:
-     * - Checks if Invoice is Appointed
+     * {@inheritdoc}
      *
      * @api
      *
-     * @param int $idSalesOrder
-     * @param int $idSalesOrderItem
+     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
      *
-     * @return bool
+     * @return \Generated\Shared\Transfer\InvoiceTransfer
      */
-    public function isInvoiceAppointed($idSalesOrder, $idSalesOrderItem)
+    public function createInvoiceItems(InvoiceTransfer $invoiceTransfer): InvoiceTransfer
     {
-        return $this->getFactory()
-            ->createTransactionStatusManager()
-            ->isInvoiceAppointed($idSalesOrder, $idSalesOrderItem);
+        return $this->getFactory()->createInvoiceItemsWriter()->create($invoiceTransfer);
     }
 
     /**
-     * @param \Generated\Shared\Transfer\InvoiceTransfer $invoiceTransfer
+     * {@inheritdoc}
      *
-     * @return bool
+     * @api
+     *
+     * @return string
      */
-    public function isCreateApproved(InvoiceTransfer $invoiceTransfer): bool
+    public function createInvoiceReference(): string
     {
-        return true;
-
+        return $this->getFactory()->createInvoiceReferenceGenerator()->generate();
     }
 }
