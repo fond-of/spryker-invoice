@@ -10,6 +10,8 @@ use Generated\Shared\Transfer\SequenceNumberSettingsTransfer;
 
 class InvoiceReferenceGenerator implements InvoiceReferenceGeneratorInterface
 {
+    protected const UNIQUE_IDENTIFIER_SEPARATOR = '-';
+
     /**
      * @var \FondOfSpryker\Zed\Invoice\Dependency\Facade\InvoiceToSequenceNumberFacadeInterface
      */
@@ -101,6 +103,6 @@ class InvoiceReferenceGenerator implements InvoiceReferenceGeneratorInterface
      */
     protected function getUniqueIdentifierSeparator(): string
     {
-        return '-';
+        return static::UNIQUE_IDENTIFIER_SEPARATOR;
     }
 }

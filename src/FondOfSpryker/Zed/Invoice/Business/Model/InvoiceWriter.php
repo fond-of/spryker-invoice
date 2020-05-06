@@ -2,6 +2,8 @@
 
 namespace FondOfSpryker\Zed\Invoice\Business\Model;
 
+use ArrayObject;
+use Exception;
 use FondOfSpryker\Zed\Invoice\Persistence\InvoiceEntityManagerInterface;
 use Generated\Shared\Transfer\InvoiceErrorTransfer;
 use Generated\Shared\Transfer\InvoiceResponseTransfer;
@@ -23,8 +25,6 @@ class InvoiceWriter implements InvoiceWriterInterface
     protected $invoicePluginExecutor;
 
     /**
-     * InvoiceWriter constructor.
-     *
      * @param \FondOfSpryker\Zed\Invoice\Persistence\InvoiceEntityManagerInterface $entityManager
      * @param \FondOfSpryker\Zed\Invoice\Business\Model\InvoicePluginExecutorInterface $invoicePluginExecutor
      */
